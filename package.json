@@ -10,11 +10,13 @@
     "dev": "nodemon"
   },
   "dependencies": {
+    "amqplib": "^0.8.0",
     "dotenv": "^16.0.0",
     "express": "^4.17.3",
     "mongoose": "^6.2.10"
   },
   "devDependencies": {
+    "@types/amqplib": "^0.8.2",
     "@types/express": "^4.17.13",
     "@types/node": "^17.0.23",
     "nodemon": "^2.0.15",
