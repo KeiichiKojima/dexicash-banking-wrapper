@@ -10,7 +10,8 @@
     "baseUrl": "src",
     "paths": {
       "@database/*": ["database/*"],
-      "@routers/*": ["routers/*"]
+      "@routers/*": ["routers/*"],
+      "@rabbit/*": ["rabbit/*"]
     }
   },
   "include": ["src/**/*"]

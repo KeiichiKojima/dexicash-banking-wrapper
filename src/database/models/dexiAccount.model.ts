@@ -23,7 +23,7 @@ dexiAccountSchema.virtual('id').get(function () {
     return this._id;
 });
 
-dexiAccountSchema.index({dexiId: 1}, {unique: true});
+dexiAccountSchema.index({ dexiId: 1 }, { unique: true });
 
 dexiAccountSchema.set('toJSON', {
     virtuals: true,
