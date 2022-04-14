@@ -4,6 +4,7 @@ export interface ITransfer extends mongoose.Document {
     dexiId: string;
     gameId: string;
     date: Date;
+    value: number;
     status: 'created' | 'completed';
 }
 
@@ -17,6 +18,10 @@ const transferSchema = new mongoose.Schema<
     },
     gameId: {
         type: String,
+        required: true,
+    },
+    value: {
+        type: Number,
         required: true,
     },
     date: {
