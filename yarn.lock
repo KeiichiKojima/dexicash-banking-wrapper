@@ -181,6 +181,13 @@
   "resolved" "https://registry.npmjs.org/acorn/-/acorn-8.7.0.tgz"
   "version" "8.7.0"
 
+"amqp-simple-pub-sub@^1.2.0":
+  "integrity" "sha512-KtnL/YZ2dbPgLsRauVGRJSqOUO5qIKgBCS4BS7tGLnQ7FZTWGAr0HeFSnkzffRHunD6EzIYj+rFa13tVqncj7g=="
+  "resolved" "https://registry.npmjs.org/amqp-simple-pub-sub/-/amqp-simple-pub-sub-1.2.0.tgz"
+  "version" "1.2.0"
+  dependencies:
+    "amqplib" "^0.8.0"
+
 "amqplib@^0.8.0":
   "integrity" "sha512-icU+a4kkq4Y1PS4NNi+YPDMwdlbFcZ1EZTQT2nigW3fvOb6AOgUQ9+Mk4ue0Zu5cBg/XpDzB40oH10ysrk2dmA=="
   "resolved" "https://registry.npmjs.org/amqplib/-/amqplib-0.8.0.tgz"

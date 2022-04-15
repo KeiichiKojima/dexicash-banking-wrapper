@@ -1,5 +1,8 @@
 #!/usr/bin/env node
 
+import { IDomainEvent } from '../core/domain/events/IDomainEvent';
+
+const { makePublisher } = require('amqp-simple-pub-sub');
 import { Order, Order_Status } from '../domain/DexiCash/Order';
 import { Order_Created } from '../domain/Events/Order_Created';
 import { DomainEvents } from '../core/domain/events/DomainEvents';
@@ -7,69 +10,77 @@ import { DomainEvents } from '../core/domain/events/DomainEvents';
 require('dotenv').config();
 const {
     RABBIT_MESSAGE_SERVER: MESSAGE_SERVER,
-    RABBIT_CHANNEL: CHANNEL
+    RABBIT_CHANNEL: CHANNEL,
 } = process.env;
 
 const { logger } = require('../services/logger');
-var amqp = require('amqplib/callback_api');
-const {MessageHandler, NotImplementedProcessorImpl, GenericService_Processor, MessageQueueProcessorImpl} = require('../rabbit/MessageHandler');
-const NAImpl = new NotImplementedProcessorImpl()
 
-const rabbitImpl = new MessageQueueProcessorImpl(CHANNEL)
-let processors:any = []
-processors['orderService'] = new GenericService_Processor(rabbitImpl);
+const { makeSubscriber } = require('amqp-simple-pub-sub');
 
-
-class DexiCash_Order_MessageHandler {
-    processors:any = [];
-    constructor(processors:any) {
-        this.processors = processors
-    }
-
-    async Handle(message:any) {
-        let result = ""
-        result = await this.processors['orderService'].Process(message)
-        return result
-    }
-}
-const messageHandler = new DexiCash_Order_MessageHandler(processors);
-DomainEvents.register( async (x)=> {
-    await console.log(`************* domain event ${JSON.stringify(x)} ************ `)}, Order_Created.name);
-DomainEvents.register( async (x)=> { await messageHandler.Handle({ message : { type : x.Type}}) }, Order_Created.name);
-
-var order = Order.Create({ OrderId : '123', Status : Order_Status.Created})
-
-
-console.log(order)
-
-
-DomainEvents.dispatchEventsForAggregate(order.id);
-
-amqp.connect(MESSAGE_SERVER, function (error0: any, connection: any) {
-    if (error0) {
-        throw error0;
-    }
-    connection.createChannel(function (error1:any, channel:any) {
-        if (error1) {
-            throw error1;
-        }
-
-        var queue = CHANNEL;
-
-        channel.assertQueue(queue, {
-            durable: false
-        });
-
-        console.log(" [*] Waiting for messages in %s. To exit press CTRL+C", queue);
-
-        channel.consume(queue, function (msg:any) {
-            var message = JSON.parse(msg.content.toString())
-            console.log(" [x] Received %s", message);
-            messageHandler.Handle(message).then((r:any) =>
-                logger.debug(r.message)
-            )
-        }, {
-            noAck: true
-        });
-    });
+const subscriber = makeSubscriber({
+    type: 'topic', // the default
+    exchange: 'topic_orders',
+    queueName: 'topic_orders',
+    routingKeys: ['orders.#'],
+    onError: (err: any) => { // optional
+        console.error('A connection error happened', err); // or do something clever
+    },
+    onClose: () => { // optional
+        console.log('The connection has closed.'); // or do something clever
+    },
 });
+
+let orders: any = [];
+
+const orderProcessHandler = (message: any) => {
+
+    try {
+        let dataMessage = JSON.parse(Buffer.from(message.content).toString());
+
+        logger.info('Message Received', dataMessage);
+        switch (dataMessage.EventType) {
+            case 'Create_Order': {
+                let order = Order.Create({ OrderId: dataMessage.OrderId});
+                orders.push(order);
+                logger.debug(orders.length);
+                break;
+            }
+            case 'Order_Created': {
+                break;
+            }
+            case 'Order_Payment_Completed': {
+                let order = orders.find((x: any) => x.OrderId === dataMessage.OrderId);
+                if(order) {
+                    order.complete();
+                    logger.debug(order);
+                }
+                else{
+                    logger.error('order not found', dataMessage)
+                }
+                break;
+            }
+            case 'Order_Payment_Cancelled': {
+                let order = orders.find((x: any) => x.OrderId === dataMessage.OrderId);
+                if(order) {
+                    order.cancelled(dataMessage.Reason);
+                    logger.debug(order);
+                }
+                else{
+                    logger.error('order not found', dataMessage)
+                }
+                break;
+            }
+            default: {
+                console.log(dataMessage.EventType);
+                break;
+            }
+        }
+        subscriber.ack(message);
+    } catch (error) {
+        logger.debug(message);
+        logger.error('Order error', error)
+    }
+};
+
+subscriber.start(orderProcessHandler);
+

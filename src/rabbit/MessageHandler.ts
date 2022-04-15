@@ -13,10 +13,10 @@ const {
 const RabbitServer = MESSAGE_SERVER
 
 class MessageQueueProcessorImpl {
-    channel
+    public exchange:string;
 
-    constructor(channel:any) {
-        this.channel = channel;
+    constructor(exchange:any) {
+        this.exchange = exchange;
     }
     send(message:any) {
         amqp.connect(RabbitServer, function (error0:any, connection:any) {
@@ -41,9 +41,34 @@ class MessageQueueProcessorImpl {
             });
         });
     }
+    publish(message:any) {
+
+        let exchange = this.exchange;
+        amqp.connect(RabbitServer, function (error0:any, connection:any) {
+            if (error0) {
+                throw error0;
+            }
+            connection.createChannel(function (error1:any, channel:any) {
+                if (error1) {
+                    throw error1;
+                }
+                message = message.message
+                var key = (message.key.length > 0) ? message.key[0] : 'anonymous.info';
+                var msg = JSON.stringify(message)
+
+                channel.assertExchange(exchange, 'topic', {
+                    durable: false
+                });
+                channel.publish(exchange, key, Buffer.from(msg));
+
+                console.log(" [x] Sent %s:'%s'", key, msg);
+
+            });
+        });
+    }
 
     Process(message:any) {
-        return this.send(message)
+        return this.publish(message)
     }
 }
 

@@ -2,7 +2,7 @@ import { IDomainEvent } from '../../core/domain/events/IDomainEvent';
 import { UniqueEntityID } from '../../core/domain/UniqueEntityID';
 import { Order } from '../DexiCash/Order';
 
-export class Order_Created implements IDomainEvent {
+export class Create_Order implements IDomainEvent {
     public key:string[];
     public EventType: string;
     public dateTimeOccurred: Date;
@@ -13,7 +13,7 @@ export class Order_Created implements IDomainEvent {
 
         const domainEventClass = Reflect.getPrototypeOf(this);
         this.EventType = domainEventClass.constructor.name;
-        this.key = [`orders.order_created`];
+        this.key = [`orders.command.create_order`];
         this.dateTimeOccurred = new Date();
         this.OrderId = order.OrderId;
         this.Id = order.id

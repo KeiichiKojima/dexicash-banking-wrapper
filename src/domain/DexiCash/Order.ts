@@ -1,11 +1,11 @@
-import { AggregateRoot } from "../../core/domain/AggregateRoot";
-import { UniqueEntityID } from "../../core/domain/UniqueEntityID";
-import { Result } from "../../core/logic/Result";
+import { AggregateRoot } from '../../core/domain/AggregateRoot';
+import { UniqueEntityID } from '../../core/domain/UniqueEntityID';
+import { Result } from '../../core/logic/Result';
 import { Order_Created } from '../Events/Order_Created';
 import { DomainEvents } from '../../core/domain/events/DomainEvents';
 
 
-export enum Order_Status  {
+export enum Order_Status {
     Created,
     Cancelled,
     Completed
@@ -13,27 +13,44 @@ export enum Order_Status  {
 
 interface IDexiCash_Order {
     OrderId: string;
-    Status : Order_Status;
+    Status?: Order_Status;
+    StatusReason?:string;
 }
 
 export class Order extends AggregateRoot<IDexiCash_Order> {
-        get id(): UniqueEntityID {
-            return this._id;
-        }
+    get id(): UniqueEntityID {
+        return this._id;
+    }
 
-    get OrderId (): string {
+    get OrderId(): string {
         return this.props.OrderId;
     }
 
-    get Status (): Order_Status {
+    get Status(): Order_Status {
         return this.props.Status;
     }
+    get StatusReason(): string {
+        return this.props.StatusReason;
+    }
 
-    private constructor (props: IDexiCash_Order, id?: UniqueEntityID) {
+    complete() {
+        this.props.Status = Order_Status.Completed;
+        console.log("************ order completed *************")
+    }
+
+    cancelled(reason : string) {
+        this.props.Status = Order_Status.Cancelled;
+        this.props.StatusReason = reason;
+        console.log("************ order cancelled *************")
+    }
+
+
+    private constructor(props: IDexiCash_Order, id?: UniqueEntityID) {
         super(props, id);
     }
 
-    public static Create (props: IDexiCash_Order, id?: UniqueEntityID): Order {
+    public static Create(props: IDexiCash_Order, id?: UniqueEntityID): Order {
+        props.Status = Order_Status.Created
         const order = new Order({
             ...props,
         }, id);
