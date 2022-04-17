@@ -5,5 +5,5 @@ yarn install
 yarn dev
 
 
-run: npx ts-node  ./src/rabbit/DexicashOrder_WorkerProcess.ts and npx ts-node  
-./src/rabbit/DexicashOrder_SendProcess.ts
+run: npx ts-node  ./src/rabbit/DexicashOrderService.ts and npx ts-node  
+./src/rabbit/PublisherUI.ts

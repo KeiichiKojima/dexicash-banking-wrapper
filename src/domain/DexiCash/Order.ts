@@ -3,6 +3,7 @@ import { UniqueEntityID } from '../../core/domain/UniqueEntityID';
 import { Result } from '../../core/logic/Result';
 import { Order_Created } from '../Events/Order_Created';
 import { DomainEvents } from '../../core/domain/events/DomainEvents';
+import { Order_Payment_Cancelled, Order_Payment_Completed } from '../Events/Order_Payment';
 
 
 export enum Order_Status {
@@ -36,14 +37,16 @@ export class Order extends AggregateRoot<IDexiCash_Order> {
     complete() {
         this.props.Status = Order_Status.Completed;
         console.log("************ order completed *************")
+        this.addDomainEvent(new Order_Payment_Completed(this));
+
     }
 
     cancelled(reason : string) {
         this.props.Status = Order_Status.Cancelled;
         this.props.StatusReason = reason;
         console.log("************ order cancelled *************")
+        this.addDomainEvent(new Order_Payment_Cancelled(this));
     }
-
 
     private constructor(props: IDexiCash_Order, id?: UniqueEntityID) {
         super(props, id);
