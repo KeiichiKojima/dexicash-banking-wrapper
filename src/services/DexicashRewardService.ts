@@ -24,8 +24,7 @@ const makeHandler = (subscriber:any, name:string) => async (message:any) => {
         switch (dataMessage.EventType) {
 
             case 'Create_Reward': {
-                console.log('I DO listen to this message ###### ', dataMessage.EventType);
-                console.log(dataMessage)
+                logger.debug('I DO listen to this message ###### ', dataMessage);
                 let reward = Reward.Create({ Amount: dataMessage.Amount, GameId: dataMessage.GameId, UserId: dataMessage.UserId, RewardId: dataMessage.RewardId });
                 rewards.push(reward);
                 DomainEvents.dispatchEventsForAggregate(reward.id);
@@ -42,14 +41,13 @@ const makeHandler = (subscriber:any, name:string) => async (message:any) => {
                 });
                 const total = Object.values(userRewards).reduce((t, {Amount}) => t + Amount, 0)
 
-                console.log(total)
-                console.log(`Balance for ${dataMessage.UserId} is ${ total || 0}`)
+                logger.debug(`Balance for ${dataMessage.UserId} is ${ total || 0}`)
                 subscriber.ack(message);
                 //await publisher.publish('orders.command.create_order', JSON.stringify({EventType:'Create_Order', OrderId: '123'}))
             }
                 break;
             default:
-                console.log('I dont listen to this message ***** ', dataMessage);
+                logger.debug('I dont listen to this message ***** ', dataMessage);
                 break;
 
         }

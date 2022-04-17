@@ -22,7 +22,7 @@ const makeHandler = (subscriber:any, name:string) => async (message:any) => {
         logger.info('Message Received', dataMessage);
         switch (dataMessage.EventType) {
             case 'Create_Deposit': {
-                console.log('I DO listen to this message ###### ', dataMessage.EventType);
+                logger.debug('I DO listen to this message ###### ', dataMessage.EventType);
                 let deposit = Deposit.Create({ OrderId: dataMessage.OrderId });
                 deposits.push(deposit);
                 DomainEvents.dispatchEventsForAggregate(deposit.id);
@@ -31,7 +31,7 @@ const makeHandler = (subscriber:any, name:string) => async (message:any) => {
             }
                 break;
             case 'Deposit_Created': {
-                console.log('I DO listen to this message ###### ', dataMessage.EventType);
+                logger.debug('I DO listen to this message ###### ', dataMessage.EventType);
                 let deposit = deposits.find((x: any) => x.OrderId === dataMessage.OrderId);
                 logger.debug(deposit);
                 subscriber.ack(message);
@@ -54,7 +54,7 @@ const makeHandler = (subscriber:any, name:string) => async (message:any) => {
 
             case 'Order_Payment_Completed': {
 
-                console.log('Order_Completed ***** ', dataMessage);
+                logger.debug('Order_Completed ***** ', dataMessage);
                 let deposit = deposits.find((x: any) => x.OrderId === dataMessage.OrderId);
                 if (deposit) {
                     deposit.complete();
@@ -69,7 +69,7 @@ const makeHandler = (subscriber:any, name:string) => async (message:any) => {
                 break;
 
             case 'Order_Payment_Cancelled': {
-                console.log('Order_Cancelled ***** ', dataMessage);
+                logger.debug('Order_Cancelled ***** ', dataMessage);
                 let deposit = deposits.find((x: any) => x.OrderId === dataMessage.OrderId);
                 if (deposit) {
                     deposit.cancelled(dataMessage.Reason);
@@ -83,7 +83,7 @@ const makeHandler = (subscriber:any, name:string) => async (message:any) => {
             }
                 break;
             default:
-                console.log('I dont listen to this message ***** ', dataMessage);
+                logger.debug('I dont listen to this message ***** ', dataMessage);
                 break;
 
         }

@@ -4,6 +4,7 @@ import { Result } from '../../core/logic/Result';
 import { Order_Created } from '../Events/Order_Created';
 import { DomainEvents } from '../../core/domain/events/DomainEvents';
 import { Order_Payment_Cancelled, Order_Payment_Completed } from '../Events/Order_Payment';
+import { logger } from '../../services/logger';
 
 
 export enum Order_Status {
@@ -36,7 +37,7 @@ export class Order extends AggregateRoot<IDexiCash_Order> {
 
     complete() {
         this.props.Status = Order_Status.Completed;
-        console.log("************ order completed *************")
+        logger.debug("************ order completed *************")
         this.addDomainEvent(new Order_Payment_Completed(this));
 
     }
@@ -44,7 +45,7 @@ export class Order extends AggregateRoot<IDexiCash_Order> {
     cancelled(reason : string) {
         this.props.Status = Order_Status.Cancelled;
         this.props.StatusReason = reason;
-        console.log("************ order cancelled *************")
+        logger.debug("************ order cancelled *************")
         this.addDomainEvent(new Order_Payment_Cancelled(this));
     }
 

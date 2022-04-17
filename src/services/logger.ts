@@ -25,7 +25,7 @@ const logger = winston.createLogger({
         }),
         new winston.transports.File({level: 'info', filename: 'handler.log'}),
         new winston.transports.Console({
-            level: 'event', format: winston.format.combine(
+            level: 'debug', format: winston.format.combine(
                 winston.format.colorize(),
                 winston.format.simple()
             )

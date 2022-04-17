@@ -45,10 +45,10 @@ process.stdin.on('keypress', (str, key) => {
     if (key.ctrl && key.name === 'c') {
         process.exit();
     } else {
-        console.log(`You pressed the "${str}" key`);
-        console.log();
-        console.log(key);
-        console.log();
+        logger.debug(`You pressed the "${str}" key`);
+        logger.debug();
+        logger.debug(key);
+        logger.debug();
 
         let event;
         (async () => {
@@ -97,14 +97,14 @@ process.stdin.on('keypress', (str, key) => {
             }
 
 
-            console.log(event);
+            logger.debug(event);
             await new Promise(r => setTimeout(r, 2000));
 
 
         })();
     }
 });
-console.log('Press any key...');
+logger.debug('Press any key...');
 
 
 

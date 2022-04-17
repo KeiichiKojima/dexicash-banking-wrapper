@@ -60,7 +60,7 @@ const makeHandler = (subscriber: any, name: string) => async (message: any) => {
             }
                 break;
             default: {
-                console.log('I dont listen to this message ***** ', dataMessage.EventType);
+                logger.debug('I dont listen to this message ***** ', dataMessage.EventType);
                 subscriber.nack(message);
             }
                 break;
