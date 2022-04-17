@@ -1,3 +1,4 @@
+import bodyParser from 'body-parser';
 import express from 'express';
 import routers from 'routers';
 
@@ -7,6 +8,8 @@ const startServer = () => {
     const port = process.env.PORT || 5000;
 
     const app = express();
+
+    app.use(bodyParser.urlencoded({ extended: true }));
 
     app.get('/', (_, res) => {
         res.status(200).send('Dexicash Banking Wrapper');
