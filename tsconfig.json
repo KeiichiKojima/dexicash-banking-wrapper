@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "moduleResolution": "node",
     "module": "commonjs",
     "esModuleInterop": true,
     "target": "es6",
@@ -9,10 +10,13 @@
     "outDir": "dists",
     "baseUrl": "src",
     "paths": {
+      "@services/*": ["services/*"],
       "@database/*": ["database/*"],
       "@routers/*": ["routers/*"],
       "@rabbit/*": ["rabbit/*"]
     }
   },
-  "include": ["src/**/*"]
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modues"],
+  "references": [ { "path": "src", "prepend": true } ]
 }
