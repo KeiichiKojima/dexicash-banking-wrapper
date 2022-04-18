@@ -1,29 +1,29 @@
-import mongoose from 'mongoose';
 import { IRepository } from './interfaces/IRepository';
+import lodash from 'lodash';
 
 export abstract class BaseRepository<T> implements IRepository<T> {
-    public readonly _model: mongoose.Model<T>;
+    private documents: T[];
 
-    constructor(model: mongoose.Model<T>) {
-        this._model = model;
+    constructor() {
+        this.documents = [];
     }
 
     async create(item: T): Promise<boolean> {
-        const result = await this._model.create(item);
+        this.documents.push(item);
 
-        return !!result;
+        return true;
     }
 
     async findOne(filter: Partial<T>): Promise<T> {
-        const result = await this._model.findOne(filter);
+        const doc = lodash.find(this.documents, filter) as T;
 
-        return result;
+        return doc;
     }
 
     async find(filter: Partial<T>): Promise<T[]> {
-        const results = await this._model.find(filter);
+        const docs = lodash.filter(this.documents, filter) as T[];
 
-        return results;
+        return docs;
     }
 
     async update(id: string, item: T): Promise<boolean> {
