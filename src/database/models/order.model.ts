@@ -1,9 +1,9 @@
 import mongoose from 'mongoose';
-import { IDexiCash_Order, Order_Status } from '@domain/DexiCash/Order';
+import { Order, Order_Status } from '@domain/DexiCash/Order';
 
 const orderSchema = new mongoose.Schema<
-    IDexiCash_Order,
-    mongoose.Model<IDexiCash_Order>
+    Order,
+    mongoose.Model<Order>
 >({
     OrderId: {
         type: String,
@@ -32,7 +32,7 @@ orderSchema.set('toObject', {
     virtuals: true,
 });
 
-const OrderModel = mongoose.model<IDexiCash_Order>(
+const OrderModel = mongoose.model<Order>(
     'Order',
     orderSchema,
 );
