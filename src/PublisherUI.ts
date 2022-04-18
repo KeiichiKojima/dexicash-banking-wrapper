@@ -8,6 +8,7 @@ const { makePublisher } = require('amqp-simple-pub-sub');
 import { Order, Order_Status } from './domain/DexiCash/Order';
 import { Order_Created } from './domain/Events/Order_Created';
 import { DomainEvents } from './core/domain/events/DomainEvents';
+import { User_Created } from './domain/Events/User_Created';
 
 require('dotenv').config();
 const {
@@ -25,7 +26,7 @@ DomainEvents.register(async (x) => {
     ;await publisher.publish(x.key[0], JSON.stringify(x));
 }, Order_Created.name);
 let orderNumber = Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 5);
-
+let dexiId = 'Michael';
 (async () => {
     await publisher.start();
 
@@ -85,11 +86,21 @@ process.stdin.on('keypress', (str, key) => {
                     event = JSON.stringify({
                         EventType: 'Create_Reward',
                         RewardId: rewardId,
-                        GameId: 'DexiKnights',
-                        UserId: orderNumber,
+                        GameId: '6238849ffffcdebf2f62e1f6',
+                        UserId: dexiId,
                         Amount: 500,
                     });
                     await publisher.publish('reward.command.create_reward', event);
+                }
+                    break;
+
+                case 'u': {
+                    dexiId = Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 5);
+                    event = JSON.stringify({
+                        EventType: 'Create_User',
+                        UserId: dexiId
+                    });
+                    await publisher.publish('user.command.create_user', event);
                 }
                     break;
                 default:

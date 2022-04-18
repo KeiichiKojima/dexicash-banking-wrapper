@@ -39,7 +39,6 @@ export class Order extends AggregateRoot<IDexiCash_Order> {
         this.props.Status = Order_Status.Completed;
         logger.debug("************ order completed *************")
         this.addDomainEvent(new Order_Payment_Completed(this));
-
     }
 
     cancelled(reason : string) {

@@ -6,17 +6,19 @@ import { DomainEvents } from '../../core/domain/events/DomainEvents';
 import { Order_Payment_Cancelled, Order_Payment_Completed } from '../Events/Order_Payment';
 import { logger } from '../../services/logger';
 import { User_Created } from '../Events/User_Created';
+import { Order_Status } from './Order';
 
 
-export enum Order_Status {
+export enum Account_Status {
     Created,
     Cancelled,
     Completed
 }
 
 interface IDexiCash_User {
-    DexiUserId: string;
-    Auth0Id: string;
+    UserId: string;
+    BankId?: string;
+    Status?: Account_Status;
 }
 
 export class User extends AggregateRoot<IDexiCash_User> {
@@ -24,11 +26,26 @@ export class User extends AggregateRoot<IDexiCash_User> {
         return this._id;
     }
 
-    get DexiUserId(): string {
-        return this.props.DexiUserId;
+    get UserId(): string {
+        return this.props.UserId;
     }
-    get Auth0Id(): string {
-        return this.props.Auth0Id;
+    get BankId(): string {
+        return this.props.BankId;
+    }
+
+    get Status(): Account_Status {
+        return this.props.Status;
+    }
+
+    assign(bankId:string) {
+        this.props.BankId = bankId;
+        this.props.Status = Account_Status.Completed;
+        logger.debug('************ assign completed *************');
+    }
+
+    cancelled(reason: string) {
+        this.props.Status = Account_Status.Cancelled;
+        logger.debug('************ order cancelled *************');
     }
 
     private constructor(props: IDexiCash_User, id?: UniqueEntityID) {
@@ -36,6 +53,7 @@ export class User extends AggregateRoot<IDexiCash_User> {
     }
 
     public static Create(props: IDexiCash_User, id?: UniqueEntityID): User {
+        props.Status = Account_Status.Created
         const user = new User({
             ...props,
         }, id);

@@ -3,6 +3,8 @@ import { Order_Created } from './domain/Events/Order_Created';
 import { Deposit_Created } from './domain/Events/Deposit_Created';
 import { Order_Payment_Cancelled, Order_Payment_Completed } from './domain/Events/Order_Payment';
 import { Reward_Created } from './domain/Events/Reward_Created';
+import { UserSubscriber } from './services/DexicashUserService';
+import { User_Created } from './domain/Events/User_Created';
 const { OrderSubscriber }  = require('./services/DexicashOrderService')
 const { DepositSubscriber }  = require('./services/DexicashDepositService')
 const { RewardSubscriber }  = require('./services/DexicashRewardService')
@@ -48,10 +50,21 @@ const start = async () => {
             JSON.stringify(x));
     }, Reward_Created.name);
 
+    DomainEvents.register(async (x) => {
+        await domainPublisher.publish('user.reward_created',
+            JSON.stringify(x));
+    }, Reward_Created.name);
+
+    DomainEvents.register(async (x) => {
+        await domainPublisher.publish('user.user_created',
+            JSON.stringify(x));
+    }, User_Created.name);
+
     const listeners = await Promise.all([
         OrderSubscriber.start('OrderService'),
         DepositSubscriber.start('DepositService'),
-        RewardSubscriber.start('RewardService')
+        RewardSubscriber.start('RewardService'),
+        UserSubscriber.start('UserService')
     ])
     return { domainPublisher, listeners }
 }
