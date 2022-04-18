@@ -5,7 +5,6 @@
     "esModuleInterop": true,
     "target": "es6",
     "noImplicitAny": true,
-    "moduleResolution": "node",
     "sourceMap": true,
     "outDir": "dists",
     "baseUrl": "src",
@@ -13,7 +12,8 @@
       "@services/*": ["services/*"],
       "@database/*": ["database/*"],
       "@routers/*": ["routers/*"],
-      "@rabbit/*": ["rabbit/*"]
+      "@rabbit/*": ["rabbit/*"],
+      "@domain/*": ["domain/*"]
     }
   },
   "include": ["src/**/*.ts"],
