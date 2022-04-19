@@ -59,7 +59,7 @@ export class Order extends AggregateRoot<IDexiCash_Order> {
         }, id);
 
         // If the id wasn't provided, it means that we're creating a new
-        // user, so we should create a UserCreatedEvent.
+        // account, so we should create a UserCreatedEvent.
 
         const idWasProvided = !!id;
 

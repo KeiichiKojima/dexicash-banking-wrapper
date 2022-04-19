@@ -1,4 +1,4 @@
-import { User } from '../domain/DexiCash/User';
+import { Account } from '../domain/DexiCash/Account';
 
 const { makePublisher } = require('amqp-simple-pub-sub');
 import { Order, Order_Status } from '../domain/DexiCash/Order';
@@ -14,8 +14,8 @@ const {
 } = process.env;
 
 const { logger } = require('../services/logger');
-let games = [ {GameId: '6238849ffffcdebf2f62e1f6', BankId: 'd66d1c20-e58b-4c5e-bc57-5aedaa1da26c'}]
-let users: any = [ ];
+let games = [ {GameId: '6238849ffffcdebf2f62e1f6', BankId: 'f7c12981-95f2-43af-9d33-d5ec25d62ba2'}]
+let accounts: any = [ ];
 
 const createAccount = async (UserId:string) => {
     var data = JSON.stringify({
@@ -84,23 +84,23 @@ const makeHandler = (subscriber: any, name: string) => async (message: any) => {
 
         logger.info('Message Received', dataMessage);
         switch (dataMessage.EventType) {
-            case 'Create_User': {
+            case 'Create_Account': {
                 logger.debug('I DO listen to this message ###### ', dataMessage.EventType);
-                let user = User.Create({ UserId: dataMessage.UserId });
-                users.push(user);
-                DomainEvents.dispatchEventsForAggregate(user.id);
-                logger.debug(users.length);
+                let account = Account.Create({ UserId: dataMessage.UserId });
+                accounts.push(account);
+                DomainEvents.dispatchEventsForAggregate(account.id);
+                logger.debug(accounts.length);
             }
                 subscriber.ack(message);
                 break;
-            case 'User_Created': {
-                let user = users.find((x: any) => x.UserId === dataMessage.UserId);
-                if (user) {
+            case 'Account_Created': {
+                let account = accounts.find((x: any) => x.UserId === dataMessage.UserId);
+                if (account) {
                     // get Id
                     try{
-                        let bankId = await createAccount(user.UserId)
-                        user.assign(bankId);
-                        logger.debug(JSON.stringify(user));
+                        let bankId = await createAccount(account.UserId)
+                        account.assign(bankId);
+                        logger.debug(JSON.stringify(account));
                         subscriber.ack(message);
                     }
                     catch (e){
@@ -110,21 +110,21 @@ const makeHandler = (subscriber: any, name: string) => async (message: any) => {
                     }
 
                 } else {
-                    logger.error('user not found', dataMessage);
+                    logger.error('account not found', dataMessage);
                     subscriber.nack(message, false, true);
                 }
             }
                 break;
             case 'Reward_Created': {
-                let user = users.find((x: any) => x.UserId === dataMessage.UserId);
+                let account = accounts.find((x: any) => x.UserId === dataMessage.UserId);
 
                 let game = games.find((x: any) => x.GameId === dataMessage.GameId);
-                if (user) {
+                if (account) {
                     // get Id
                     try{
                         logger.debug(JSON.stringify(dataMessage));
 
-                        let bankId = await createTransfer(game.BankId, user.BankId, dataMessage.Amount)
+                        let bankId = await createTransfer(game.BankId, account.BankId, dataMessage.Amount)
                         logger.debug(JSON.stringify(bankId));
                         subscriber.ack(message);
                     }
@@ -135,7 +135,7 @@ const makeHandler = (subscriber: any, name: string) => async (message: any) => {
                     }
 
                 } else {
-                    logger.error('user not found', dataMessage);
+                    logger.error('account not found', dataMessage);
                     subscriber.nack(message, false, true);
                 }
             }
@@ -152,7 +152,7 @@ const makeHandler = (subscriber: any, name: string) => async (message: any) => {
 };
 
 
-const { USER_QUEUE: queueName, USER_routingKey: routingKey } = require('../constants');
+const { ACCOUNT_QUEUE: queueName, ACCOUNT_routingKey: routingKey } = require('../constants');
 const { genericSubscriber } = require('../rabbit/genericSubscriber');
-const UserSubscriber = genericSubscriber(queueName, routingKey, makeHandler);
-export { UserSubscriber };
+const AccountSubscriber = genericSubscriber(queueName, routingKey, makeHandler);
+export { AccountSubscriber };

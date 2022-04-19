@@ -5,7 +5,7 @@ import { Order_Created } from '../Events/Order_Created';
 import { DomainEvents } from '../../core/domain/events/DomainEvents';
 import { Order_Payment_Cancelled, Order_Payment_Completed } from '../Events/Order_Payment';
 import { logger } from '../../services/logger';
-import { User_Created } from '../Events/User_Created';
+import { Account_Created } from '../Events/Account_Created';
 import { Order_Status } from './Order';
 
 
@@ -15,13 +15,13 @@ export enum Account_Status {
     Completed
 }
 
-interface IDexiCash_User {
+interface IDexiCash_Account {
     UserId: string;
     BankId?: string;
     Status?: Account_Status;
 }
 
-export class User extends AggregateRoot<IDexiCash_User> {
+export class Account extends AggregateRoot<IDexiCash_Account> {
     get id(): UniqueEntityID {
         return this._id;
     }
@@ -48,28 +48,27 @@ export class User extends AggregateRoot<IDexiCash_User> {
         logger.debug('************ order cancelled *************');
     }
 
-    private constructor(props: IDexiCash_User, id?: UniqueEntityID) {
+    private constructor(props: IDexiCash_Account, id?: UniqueEntityID) {
         super(props, id);
     }
 
-    public static Create(props: IDexiCash_User, id?: UniqueEntityID): User {
+    public static Create(props: IDexiCash_Account, id?: UniqueEntityID): Account {
         props.Status = Account_Status.Created
-        const user = new User({
+        const account = new Account({
             ...props,
         }, id);
 
         // If the id wasn't provided, it means that we're creating a new
-        // user, so we should create a UserCreatedEvent.
+        // account, so we should create a UserCreatedEvent.
 
         const idWasProvided = !!id;
 
         if (!idWasProvided) {
             // Method from the AggregateRoot parent class. We'll look
             // closer at this.
-            user.addDomainEvent(new User_Created(user));
+            account.addDomainEvent(new Account_Created(account));
         }
 
-        return user;
+        return account;
     }
-
 }
