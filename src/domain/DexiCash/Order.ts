@@ -13,7 +13,7 @@ export enum Order_Status {
     Completed
 }
 
-interface IDexiCash_Order {
+export interface IDexiCash_Order {
     OrderId: string;
     Status?: Order_Status;
     StatusReason?:string;
