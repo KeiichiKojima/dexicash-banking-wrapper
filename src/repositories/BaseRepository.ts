@@ -56,6 +56,10 @@ export abstract class BaseRepository<Q extends Object, T extends AggregateRoot<Q
         }
     }
 
+    async save(item: T): Promise<boolean> {
+        return this.update(item.id, item);
+    }
+
     async delete(id: UniqueEntityID): Promise<boolean> {
         try {
             delete this.documents[id.toString()];
