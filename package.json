@@ -7,16 +7,21 @@
   "scripts": {
     "build": "rm -rf dist && tsc",
     "start": "rm -rf dist && tsc && node .",
-    "dev": "nodemon"
+    "dev": "nodemon",
+    "test": "mocha -r ts-node/register 'tests/**/*.ts' "
   },
   "dependencies": {
+    "@types/chai": "^4.3.1",
+    "@types/mocha": "^9.1.0",
     "amqp-simple-pub-sub": "^1.2.0",
     "amqplib": "^0.8.0",
     "axios": "^0.26.1",
+    "chai": "^4.3.6",
     "dotenv": "^16.0.0",
     "express": "^4.17.3",
     "express-async-handler": "^1.2.0",
     "lodash": "^4.17.21",
+    "mocha": "^9.2.2",
     "mongoose": "^6.2.10",
     "uuid": "^8.3.2",
     "uuid-v4": "^0.1.0",
