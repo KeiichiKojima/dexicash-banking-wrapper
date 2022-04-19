@@ -1,5 +1,5 @@
 import { OrderRepository } from '../../src/repositories/OrderRepository';
-import { Order } from '../../src/domain/DexiCash/Order';
+import { Order, Order_Status } from '../../src/domain/DexiCash/Order';
 import { expect } from 'chai';
 
 describe('Order Repo tests', () => {
@@ -31,13 +31,19 @@ describe('Order Repo tests', () => {
 
         const findRes = await orderRepo.findOne({ OrderId: order2.OrderId });
 
-        console.log(findRes);
-
         expect(findRes.props.StatusReason, "Cancelled status reason").to.equal("Some reason");
     });
 
     it('find', async () => {
         const findOneRes = await orderRepo.findOne({ OrderId: "2" });
+
+        findOneRes.complete();
+
+        expect(findOneRes.Status, "Completed Order 2").to.equal(Order_Status.Completed);
+
+        findOneRes.cancelled("some cancel reason");
+
+        expect(findOneRes.StatusReason, "Cancelled Order 2").to.equal("some cancel reason");
 
         expect(findOneRes, "Findone by OrderId 2").to.not.be.null;
 

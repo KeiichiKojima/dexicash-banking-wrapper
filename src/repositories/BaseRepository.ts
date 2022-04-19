@@ -20,7 +20,7 @@ export abstract class BaseRepository<Q extends Object, T extends AggregateRoot<Q
         return false;
     }
 
-    async findOne(filter: Partial<T>): Promise<T | null> {
+    async _findOne(filter: Partial<T>): Promise<T | null> {
         for (let id in this.documents) {
             const obj = JSON.parse(this.documents[id]) as T;
 
@@ -32,7 +32,7 @@ export abstract class BaseRepository<Q extends Object, T extends AggregateRoot<Q
         return null;
     }
 
-    async find(filter: Partial<T>): Promise<T[]> {
+    async _find(filter: Partial<T>): Promise<T[]> {
         const docs: T[] = [];
 
         for (let id in this.documents) {
