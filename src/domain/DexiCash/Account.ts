@@ -15,7 +15,7 @@ export enum Account_Status {
     Completed
 }
 
-interface IDexiCash_Account {
+export interface IDexiCash_Account {
     UserId: string;
     BankId?: string;
     Status?: Account_Status;

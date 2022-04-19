@@ -11,7 +11,7 @@ export enum Reward_Status {
     Completed
 }
 
-interface IDexiCash_Reward {
+export interface IDexiCash_Reward {
     RewardId: string;
     GameId: string;
     UserId: string;
