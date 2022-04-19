@@ -10,7 +10,7 @@ export enum Deposit_Status {
     Completed
 }
 
-interface IDexiCash_Deposit {
+export interface IDexiCash_Deposit {
     OrderId: string;
     Status?: Deposit_Status;
     StatusReason?: string;

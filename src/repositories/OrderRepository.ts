@@ -1,4 +1,4 @@
 import { BaseRepository } from './BaseRepository';
-import { Order } from '../domain/DexiCash/Order';
+import { Order, IDexiCash_Order } from '../domain/DexiCash/Order';
 
-export class OrderRepository extends BaseRepository<Order> { }
+export class OrderRepository extends BaseRepository<IDexiCash_Order, Order> { }
