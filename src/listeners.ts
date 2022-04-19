@@ -14,18 +14,18 @@ const FIVE_SECONDS = 5000
 const start = async () => {
     const domainPublisher = await Publisher.start()
 
-    DomainEvents.register(async (x) => {
+/*    DomainEvents.register(async (x) => {
         await console.log(`************* domain event ${JSON.stringify(x)} ************ `);
     }, Order_Created.name);
     DomainEvents.register(async (x) => {
         await console.log(`************* domain event ${JSON.stringify(x)} ************ `);
-    }, Deposit_Created.name);
+    }, Deposit_Created.name);*/
 
 
-    DomainEvents.register(async (x) => {
+    /*DomainEvents.register(async (x) => {
         await domainPublisher.publish('orders.order_created',
             JSON.stringify(x));
-    }, Order_Created.name);
+    }, Order_Created.name);*/
     DomainEvents.register(async (x) => {
         await domainPublisher.publish('deposit.order_created',
             JSON.stringify(x));

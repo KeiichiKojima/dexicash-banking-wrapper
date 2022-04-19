@@ -18,9 +18,8 @@
     "express-async-handler": "^1.2.0",
     "lodash": "^4.17.21",
     "mongoose": "^6.2.10",
-    "uuid": "^8.3.2",
+    "shallow-equal-object": "^1.1.1",
     "uuid-v4": "^0.1.0",
-    "uuidv4": "^6.2.13",
     "winston": "^3.6.0"
   },
   "devDependencies": {

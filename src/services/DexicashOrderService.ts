@@ -10,7 +10,7 @@ const {
 } = process.env;
 
 const { logger } = require('../services/logger');
-//const orders = new OrderRepository()
+const ordersRepo = new OrderRepository()
 let orders: any = [];
 
 const makeHandler = (subscriber: any, name: string) => async (message: any) => {
@@ -21,15 +21,18 @@ const makeHandler = (subscriber: any, name: string) => async (message: any) => {
         switch (dataMessage.EventType) {
             case 'Create_Order': {
                 //let order = await orders.findOne({ OrderId: dataMessage.OrderId });
-
+                //let order = await ordersRepo.findOne({ OrderId: dataMessage.OrderId });
                 let order = orders.find((x: any) => x.OrderId === dataMessage.OrderId);
                 if (!order) {
                     //let _order = await OrderModel.create({ OrderId: dataMessage.OrderId });
 
                     let order = Order.Create({ OrderId: dataMessage.OrderId });
+                    logger.debug(JSON.stringify(dataMessage))
+
+                    //await ordersRepo.save(order)
                     orders.push(order);
                     DomainEvents.dispatchEventsForAggregate(order.id);
-                    logger.debug(orders.length);
+                    logger.debug(JSON.stringify(order));
                     subscriber.ack(message);
                 } else {
 
@@ -40,10 +43,13 @@ const makeHandler = (subscriber: any, name: string) => async (message: any) => {
                 break;
             case 'Order_Payment_Completed': {
                 let order = orders.find((x: any) => x.OrderId === dataMessage.OrderId);
+                //let orderData = await ordersRepo.findOne({ OrderId: dataMessage.OrderId });
+                //let order = Order.Create(orderData.props, orderData.id)
                 if (order) {
                     order.complete();
+                    //await ordersRepo.save(order)
                     DomainEvents.dispatchEventsForAggregate(order.id);
-                    logger.debug(order);
+                    logger.debug(JSON.stringify(order));
                     subscriber.ack(message);
                 } else {
                     logger.error('order not found', dataMessage);
@@ -53,10 +59,13 @@ const makeHandler = (subscriber: any, name: string) => async (message: any) => {
                 break;
             case 'Order_Payment_Cancelled': {
                 let order = orders.find((x: any) => x.OrderId === dataMessage.OrderId);
+                //let orderData = await ordersRepo.findOne({ OrderId: dataMessage.OrderId });
+                //let order = Order.Create(orderData.props, orderData.id)
                 if (order) {
                     order.cancelled(dataMessage.Reason);
+                    //await ordersRepo.save(order)
                     DomainEvents.dispatchEventsForAggregate(order.id);
-                    logger.debug(order);
+                    logger.debug(JSON.stringify(order));
                     subscriber.ack(message);
                 } else {
                     logger.error('order not found', dataMessage);

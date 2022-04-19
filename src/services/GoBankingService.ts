@@ -1,5 +1,6 @@
 import axios, { AxiosRequestConfig } from 'axios';
 import { logger } from './logger';
+const { BANK_API } = require('../constants')
 
 const create = async (UserId: string, StartingBalance?: number) => {
     var data = JSON.stringify({
@@ -10,7 +11,7 @@ const create = async (UserId: string, StartingBalance?: number) => {
     logger.debug(`********** create ${JSON.stringify(data)}`);
 
     var config: AxiosRequestConfig = {
-        method: 'post', url: 'http://localhost:3001/v1/accounts',
+        method: 'post', url: `${BANK_API}/v1/accounts`,
         headers: {
             'Content-Type': 'application/json',
         },
@@ -46,7 +47,7 @@ const transfer = async (GameId: string, UserId: string, Amount: number) => {
     logger.debug(`********** transfer ${JSON.stringify(data)}`);
 
     var config: AxiosRequestConfig = {
-        method: 'post', url: 'http://localhost:3001/v1/transfers',
+        method: 'post', url: `${BANK_API}/v1/transfers`,
         headers: {
             'Content-Type': 'application/json',
         },
@@ -68,7 +69,7 @@ const transfer = async (GameId: string, UserId: string, Amount: number) => {
 const getaccount = async (UserId: string) => {
 
     var config: AxiosRequestConfig = {
-        method: 'get', url: 'http://localhost:3001/v1/accounts',
+        method: 'get', url: `${BANK_API}/v1/accounts`,
     };
 
     return axios(config)

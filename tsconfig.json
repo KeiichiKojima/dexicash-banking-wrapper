@@ -18,5 +18,4 @@
   },
   "include": ["src/**/*.ts"],
   "exclude": ["node_modues"],
-  "references": [ { "path": "src", "prepend": true } ]
 }

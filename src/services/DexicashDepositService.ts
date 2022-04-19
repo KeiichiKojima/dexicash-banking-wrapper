@@ -22,7 +22,9 @@ const makeHandler = (subscriber:any, name:string) => async (message:any) => {
         logger.info('Message Received', dataMessage);
         switch (dataMessage.EventType) {
             case 'Create_Deposit': {
-                logger.debug('I DO listen to this message ###### ', dataMessage.EventType);
+                logger.debug(`I DO listen to this message ###### : ${dataMessage.EventType}`);
+                console.log(dataMessage.EventType);
+
                 let deposit = Deposit.Create({ OrderId: dataMessage.OrderId });
                 deposits.push(deposit);
                 DomainEvents.dispatchEventsForAggregate(deposit.id);
@@ -31,17 +33,18 @@ const makeHandler = (subscriber:any, name:string) => async (message:any) => {
             }
                 break;
             case 'Deposit_Created': {
-                logger.debug('I DO listen to this message ###### ', dataMessage.EventType);
+                logger.debug(`I DO listen to this message ###### : ${dataMessage.EventType}`);
                 let deposit = deposits.find((x: any) => x.OrderId === dataMessage.OrderId);
-                logger.debug(deposit);
+                console.log(JSON.stringify(deposits));
                 subscriber.ack(message);
             }
                 break;
 
             case 'Order_Created': {
-
-                logger.debug('*********** ddeposit will be created here **********');
+                logger.debug(`I DO listen to this message ###### : ${dataMessage.EventType}`);
                 let deposit = Deposit.Create({ OrderId: dataMessage.OrderId });
+                console.log(`${dataMessage.EventType} ${JSON.stringify(deposit)}`);
+
                 deposits.push(deposit);
 
                 DomainEvents.dispatchEventsForAggregate(deposit.id);
@@ -54,7 +57,7 @@ const makeHandler = (subscriber:any, name:string) => async (message:any) => {
 
             case 'Order_Payment_Completed': {
 
-                logger.debug('Order_Completed ***** ', dataMessage);
+                logger.info('Order_Completed ***** ', dataMessage);
                 let deposit = deposits.find((x: any) => x.OrderId === dataMessage.OrderId);
                 if (deposit) {
                     deposit.complete();
@@ -69,7 +72,7 @@ const makeHandler = (subscriber:any, name:string) => async (message:any) => {
                 break;
 
             case 'Order_Payment_Cancelled': {
-                logger.debug('Order_Cancelled ***** ', dataMessage);
+                logger.info('Order_Cancelled ***** ', dataMessage);
                 let deposit = deposits.find((x: any) => x.OrderId === dataMessage.OrderId);
                 if (deposit) {
                     deposit.cancelled(dataMessage.Reason);
@@ -83,12 +86,12 @@ const makeHandler = (subscriber:any, name:string) => async (message:any) => {
             }
                 break;
             default:
-                logger.debug('I dont listen to this message ***** ', dataMessage);
+                logger.info('I dont listen to this message ***** ', dataMessage);
                 break;
 
         }
     } catch (error) {
-        logger.debug(message);
+        logger.info(message);
         logger.error('Deposit error', error);
     }
 }

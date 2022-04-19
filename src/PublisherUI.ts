@@ -3,6 +3,7 @@
 import { Order_Payment_Completed } from './domain/Events/Order_Payment';
 
 const { logger } = require('./services/logger');
+const { RABBIT_MESSAGE_SERVER, exchange } = require('./constants')
 
 const { makePublisher } = require('amqp-simple-pub-sub');
 import { Order, Order_Status } from './domain/DexiCash/Order';
@@ -19,7 +20,8 @@ const {
 
 const publisher = makePublisher({
     type: 'topic', // the default
-    exchange: 'topic_orders',
+    url: RABBIT_MESSAGE_SERVER,
+    exchange: exchange,
 });
 
 DomainEvents.register(async (x) => {
