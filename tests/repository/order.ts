@@ -31,7 +31,7 @@ describe('Order Repo tests', () => {
 
         const findRes = await orderRepo.findOne({ OrderId: order2.OrderId });
 
-        expect(findRes.props.StatusReason, "Cancelled status reason").to.equal("Some reason");
+        expect(findRes.StatusReason, "Cancelled status reason").to.equal("Some reason");
     });
 
     it('find', async () => {
