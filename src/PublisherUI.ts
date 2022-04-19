@@ -93,7 +93,18 @@ process.stdin.on('keypress', (str, key) => {
                     await publisher.publish('reward.command.create_reward', event);
                 }
                     break;
+                case 's': {
 
+                    let games = [ {GameId: '6238849ffffcdebf2f62e1f6'}]
+                    games.map(async (gameId)=>{
+                        event = JSON.stringify({
+                            EventType: 'Create_Game_Account',
+                            UserId: gameId.GameId
+                        });
+                        await publisher.publish('account.command.create_account', event);
+                    })
+                }
+                    break;
                 case 'u': {
                     dexiId = Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 5);
                     event = JSON.stringify({
