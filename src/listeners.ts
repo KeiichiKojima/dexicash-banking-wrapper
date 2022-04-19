@@ -3,8 +3,8 @@ import { Order_Created } from './domain/Events/Order_Created';
 import { Deposit_Created } from './domain/Events/Deposit_Created';
 import { Order_Payment_Cancelled, Order_Payment_Completed } from './domain/Events/Order_Payment';
 import { Reward_Created } from './domain/Events/Reward_Created';
-import { UserSubscriber } from './services/DexicashUserService';
-import { User_Created } from './domain/Events/User_Created';
+import { AccountSubscriber } from './services/DexicashAccountService';
+import { Account_Created } from './domain/Events/Account_Created';
 const { OrderSubscriber }  = require('./services/DexicashOrderService')
 const { DepositSubscriber }  = require('./services/DexicashDepositService')
 const { RewardSubscriber }  = require('./services/DexicashRewardService')
@@ -51,20 +51,20 @@ const start = async () => {
     }, Reward_Created.name);
 
     DomainEvents.register(async (x) => {
-        await domainPublisher.publish('user.reward_created',
+        await domainPublisher.publish('account.reward_created',
             JSON.stringify(x));
     }, Reward_Created.name);
 
     DomainEvents.register(async (x) => {
-        await domainPublisher.publish('user.user_created',
+        await domainPublisher.publish('account.account_created',
             JSON.stringify(x));
-    }, User_Created.name);
+    }, Account_Created.name);
 
     const listeners = await Promise.all([
         OrderSubscriber.start('OrderService'),
         DepositSubscriber.start('DepositService'),
         RewardSubscriber.start('RewardService'),
-        UserSubscriber.start('UserService')
+        AccountSubscriber.start('AccountService')
     ])
     return { domainPublisher, listeners }
 }
@@ -77,7 +77,7 @@ const run = async () => {
         console.log('stopping listeners')
         await Promise.all(listeners.map(s => s.close()))
 
-        console.log('stopping image detector')
+        console.log('stopping publisher')
         await domainPublisher.close()
     }
     const doShutdown = () => {

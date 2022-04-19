@@ -1,23 +1,25 @@
 import { IDomainEvent } from '../../core/domain/events/IDomainEvent';
 import { UniqueEntityID } from '../../core/domain/UniqueEntityID';
 import { Order } from '../DexiCash/Order';
-import { User } from '../DexiCash/User';
+import { Account } from '../DexiCash/Account';
 
-export class Create_User implements IDomainEvent {
+export class Account_Created implements IDomainEvent {
     public key:string[];
     public EventType: string;
     public dateTimeOccurred: Date;
     public UserId: string;
+    public BankId: string;
     public Id: UniqueEntityID;
 
-    constructor (user: User) {
+    constructor (account: Account) {
 
         const domainEventClass = Reflect.getPrototypeOf(this);
         this.EventType = domainEventClass.constructor.name;
-        this.key = [`orders.command.create_order`];
+        this.key = [`orders.order_created`];
         this.dateTimeOccurred = new Date();
-        this.UserId = user.UserId;
-        this.Id = user.id
+        this.UserId = account.UserId;
+        this.BankId = account.BankId;
+        this.Id = account.id
     }
 
     getAggregateId (): UniqueEntityID {

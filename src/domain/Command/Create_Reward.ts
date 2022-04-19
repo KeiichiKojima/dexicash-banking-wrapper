@@ -14,7 +14,7 @@ export class Create_Reward implements IDomainEvent {
 
         const domainEventClass = Reflect.getPrototypeOf(this);
         this.EventType = domainEventClass.constructor.name;
-        this.key = [`orders.command.create_order`];
+        this.key = [`orders.command.create_reward`];
         this.dateTimeOccurred = new Date();
         this.RewardId = reward.RewardId;
         this.Amount = reward.Amount;

@@ -1,6 +1,7 @@
 import { Order, Order_Status } from '../domain/DexiCash/Order';
 import { DomainEvents } from '../core/domain/events/DomainEvents';
 import OrderModel from '@database/models/order.model';
+import { OrderRepository } from '../repositories/OrderRepository';
 
 require('dotenv').config();
 const {
@@ -9,7 +10,7 @@ const {
 } = process.env;
 
 const { logger } = require('../services/logger');
-
+//const orders = new OrderRepository()
 let orders: any = [];
 
 const makeHandler = (subscriber: any, name: string) => async (message: any) => {
@@ -19,12 +20,12 @@ const makeHandler = (subscriber: any, name: string) => async (message: any) => {
         logger.info('Message Received', dataMessage);
         switch (dataMessage.EventType) {
             case 'Create_Order': {
-                let _order = await OrderModel.findOne({ OrderId: dataMessage.OrderId });
+                //let order = await orders.findOne({ OrderId: dataMessage.OrderId });
 
                 let order = orders.find((x: any) => x.OrderId === dataMessage.OrderId);
                 if (!order) {
-                    let _order = await OrderModel.create({ OrderId: dataMessage.OrderId });
-                    
+                    //let _order = await OrderModel.create({ OrderId: dataMessage.OrderId });
+
                     let order = Order.Create({ OrderId: dataMessage.OrderId });
                     orders.push(order);
                     DomainEvents.dispatchEventsForAggregate(order.id);
