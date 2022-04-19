@@ -1,36 +1,68 @@
 import { IRepository } from './interfaces/IRepository';
-import lodash from 'lodash';
+import { isMatch } from 'lodash';
+import { AggregateRoot } from '../core/domain/AggregateRoot';
+import { UniqueEntityID } from '../core/domain/UniqueEntityID';
 
-export abstract class BaseRepository<T> implements IRepository<T> {
-    private documents: T[];
+export abstract class BaseRepository<Q extends Object, T extends AggregateRoot<Q>> implements IRepository<T> {
+    private documents: Record<string, string>;
 
     constructor() {
-        this.documents = [];
+        this.documents = {};
     }
 
     async create(item: T): Promise<boolean> {
-        this.documents.push(item);
+        if (!this.documents[item.id.toString()]) {
+            this.documents[item.id.toString()] = JSON.stringify(item);
 
-        return true;
+            return true;
+        }
+
+        return false;
     }
 
-    async findOne(filter: Partial<T>): Promise<T> {
-        const doc = lodash.find(this.documents, filter) as T;
+    async findOne(filter: Partial<T>): Promise<T | null> {
+        for (let id in this.documents) {
+            const obj = JSON.parse(this.documents[id]) as T;
 
-        return doc;
+            if (isMatch(obj.props, filter)) {
+                return obj;
+            }
+        }
+
+        return null;
     }
 
     async find(filter: Partial<T>): Promise<T[]> {
-        const docs = lodash.filter(this.documents, filter) as T[];
+        const docs: T[] = [];
+
+        for (let id in this.documents) {
+            const obj = JSON.parse(this.documents[id]);
+
+            if (isMatch(obj.props, filter)) {
+                docs.push(obj);
+            }
+        }
 
         return docs;
     }
 
-    async update(id: string, item: T): Promise<boolean> {
-        throw new Error('Method not implemented.');
+    async update(id: UniqueEntityID, item: T): Promise<boolean> {
+        try {
+            this.documents[id.toString()] = JSON.stringify(item);
+
+            return true;
+        } catch {
+            return false;
+        }
     }
 
-    async delete(id: string): Promise<boolean> {
-        throw new Error('Method not implemented.');
+    async delete(id: UniqueEntityID): Promise<boolean> {
+        try {
+            delete this.documents[id.toString()];
+
+            return true;
+        } catch {
+            return false;
+        }
     }
 }
