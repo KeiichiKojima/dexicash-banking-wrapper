@@ -1,13 +1,10 @@
 import { Reward } from '../domain/DexiCash/Reward';
 
-const { makePublisher } = require('amqp-simple-pub-sub');
-import { Order, Order_Status } from '../domain/DexiCash/Order';
-import { Order_Created } from '../domain/Events/Order_Created';
 import { DomainEvents } from '../core/domain/events/DomainEvents';
-import { Deposit } from '../domain/DexiCash/Deposit';
 import { RewardRepository } from '../repositories/RewardRepository';
-import { createLootRequest, getLootRequest } from '../services/DexiEmporiumAPIService';
-import { UniqueEntityID } from '../core/domain/UniqueEntityID';
+import { createInventoryTransfer, createLootRequest, getLootRequest } from '../services/DexiEmporiumAPIService';
+import { transfer } from '../services/GoBankingService';
+import { accountRepository, rewardRepository } from '../repositories';
 
 require('dotenv').config();
 const {
@@ -16,8 +13,6 @@ const {
 } = process.env;
 
 const { logger } = require('../services/logger');
-
-let rewardRepository:RewardRepository = new RewardRepository();
 
 const makeHandler = (subscriber:any, name:string) => async (message:any) => {
     try {
@@ -56,29 +51,25 @@ const makeHandler = (subscriber:any, name:string) => async (message:any) => {
 
                 logger.info('Reward_Created Message Received', dataMessage);
                 let reward = await rewardRepository.findOne( {RewardId : dataMessage.RewardId });
-                let requestId = await createLootRequest(reward.UserId, reward.GameId).catch(
-                    (error) => {
-                        throw JSON.stringify(error);
-                    },
-                );
+                if(reward) {
 
-                let data = await getLootRequest(reward.UserId, "requestId");
-                if(data.data.winStatus === 'Won'){
-                    console.log("!!!!!!!!!!!!!!!!!!!!", data.data.winStatus, data.data.loot)
+                    let requestId = await createLootRequest(reward.UserId, reward.GameId).catch(
+                        (error) => {
+                            throw JSON.stringify(error);
+                        },
+                    );
 
-                    reward.complete(data.data.loot)
-                }else{
-                    reward.cancelled('Lose')
+                    let data = await getLootRequest(reward.UserId, "requestId");
+                    if (data.data.winStatus === 'Won') {
+                        reward.authorised(data.data.loot)
+                    } else {
+                        reward.cancelled('Lose')
+                    }
+
+                    await rewardRepository.save(reward);
+                    DomainEvents.dispatchEventsForAggregate(reward.id);
+                    subscriber.ack(message);
                 }
-
-                await rewardRepository.save(reward);
-                DomainEvents.dispatchEventsForAggregate(reward.id);
-                /*let userRewards = await rewardRepository.findOne( {UserId : dataMessage.UserId });
-                const total = Object.values(userRewards).reduce((t, {Amount}) => t + Amount, 0)
-
-                logger.debug(`Balance for ${dataMessage.UserId} is ${ total || 0}`)*/
-                subscriber.ack(message);
-                //await publisher.publish('orders.command.create_order', JSON.stringify({EventType:'Create_Order', OrderId: '123'}))
             }
                 break;
             case 'Reward_Cancelled': {
@@ -86,6 +77,69 @@ const makeHandler = (subscriber:any, name:string) => async (message:any) => {
                 logger.info('Reward_Cancelled Message Received', dataMessage);
                 subscriber.ack(message);
                 //await publisher.publish('orders.command.create_order', JSON.stringify({EventType:'Create_Order', OrderId: '123'}))
+            }
+                break;
+            case 'Reward_Completed': {
+
+                logger.info('Reward_Completed Message Received', dataMessage);
+                subscriber.ack(message);
+                //await publisher.publish('orders.command.create_order', JSON.stringify({EventType:'Create_Order', OrderId: '123'}))
+            }
+                break;
+            case 'DexiCash_Reward_Created': {
+
+                let reward = await rewardRepository.findOne( {RewardId : dataMessage.RewardId });
+                if(reward) {
+                    let account = await accountRepository.findOne({ UserId: dataMessage.UserId });
+                    let game = await accountRepository.findOne({ UserId: dataMessage.GameId });
+                    if (account && game) {
+                        // get Id
+                        try {
+                            logger.debug(JSON.stringify(dataMessage));
+
+                            let request = await transfer(game.BankId, account.BankId, dataMessage.Amount);
+                            logger.info(request)
+
+                            if (request && request?.status === 'success') {
+                                reward.completed()
+                                await rewardRepository.save(reward);
+                                DomainEvents.dispatchEventsForAggregate(reward.id);
+                            }
+
+                            subscriber.ack(message);
+                        } catch (e) {
+                            logger.error(e);
+
+                            subscriber.nack(message);
+                        }
+
+                    } else {
+                        logger.error('accounts not found', dataMessage);
+                        subscriber.nack(message, false, true);
+                    }
+                }
+            }
+                break;
+            case 'Item_Reward_Claimed': {
+
+                let reward = await rewardRepository.findOne( {RewardId : dataMessage.RewardId });
+                if(reward) {
+                    logger.info('Item_Reward_Claimed Message Received', dataMessage);
+
+                    let request = await createInventoryTransfer(reward.UserId, reward.GameId, dataMessage.Prize).catch(
+                        (error) => {
+                            throw JSON.stringify(error);
+                        },
+                    );
+                    logger.debug(request)
+
+                    if(request && request?.status === 'success'){
+                        reward.completed()
+                        await rewardRepository.save(reward);
+                        DomainEvents.dispatchEventsForAggregate(reward.id);
+                    }
+                    subscriber.ack(message);
+                }
             }
                 break;
             default:

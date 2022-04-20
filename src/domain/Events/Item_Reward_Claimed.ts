@@ -14,7 +14,7 @@ export class Item_Reward_Claimed implements IDomainEvent {
 
         const domainEventClass = Reflect.getPrototypeOf(this);
         this.EventType = domainEventClass.constructor.name;
-        this.key = [`reward.item_reward_created`];
+        this.key = [`reward.item_reward_claimed`];
         this.dateTimeOccurred = new Date();
         this.RewardId = reward.RewardId;
         this.Prize = reward.Prize;

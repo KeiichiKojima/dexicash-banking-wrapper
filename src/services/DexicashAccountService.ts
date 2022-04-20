@@ -1,12 +1,8 @@
 import { Account } from '../domain/DexiCash/Account';
-
-const { makePublisher } = require('amqp-simple-pub-sub');
-import { Order, Order_Status } from '../domain/DexiCash/Order';
-import { Order_Created } from '../domain/Events/Order_Created';
 import { DomainEvents } from '../core/domain/events/DomainEvents';
-import { Deposit } from '../domain/DexiCash/Deposit';
 import { create, getaccount, transfer } from '../services/GoBankingService';
 import { AccountRepository } from '../repositories/AccountRepository';
+import { accountRepository } from '../repositories';
 
 var axios = require('axios');
 require('dotenv').config();
@@ -16,7 +12,6 @@ const {
 } = process.env;
 
 const { logger } = require('../services/logger');
-let accountRepo = new AccountRepository()
 
 const makeHandler = (subscriber: any, name: string) => async (message: any) => {
     try {
@@ -27,21 +22,26 @@ const makeHandler = (subscriber: any, name: string) => async (message: any) => {
         switch (dataMessage.EventType) {
             case 'Create_Account': {
 
+                logger.debug('I DO listen to this message ###### ', dataMessage.EventType);
                 try {
-                    logger.debug(`********* Create_Account ${JSON.stringify(dataMessage)}`);
-
-                    logger.debug('I DO listen to this message ###### ', dataMessage.EventType);
                     let account = Account.Create({ UserId: dataMessage.UserId });
                     let bankId = await create(account.UserId).catch(
                         (error) => {
-                            throw JSON.stringify(error);
+                            if (error.toString().includes('duplicate key value')) {
+                                return getaccount(dataMessage.UserId).then(function(response) {
+                                    logger.debug(`create existing account: ${JSON.stringify(response)}`);
+                                    return response;
+                                }).catch(({ response }) => {
+                                    logger.error(response.data);
+                                    throw new Error(response.data);
+                                });
+                            }
                         },
                     );
-
                     account.assign(bankId);
-                    await accountRepo.save(account);
+                    await accountRepository.save(account);
                     DomainEvents.dispatchEventsForAggregate(account.id);
-                    logger.debug(`********* Finished Create_Account ${JSON.stringify(accountRepo)}`);
+                    subscriber.ack(message);
 
                 } catch (error: any) {
                     logger.error(error);
@@ -50,7 +50,6 @@ const makeHandler = (subscriber: any, name: string) => async (message: any) => {
                 }
 
             }
-                subscriber.ack(message);
                 break;
             case 'Create_Game_Account': {
                 logger.debug('I DO listen to this message ###### ', dataMessage.EventType);
@@ -70,7 +69,7 @@ const makeHandler = (subscriber: any, name: string) => async (message: any) => {
                         },
                     );
                     account.assign(bankId);
-                    await accountRepo.save(account);
+                    await accountRepository.save(account);
                     DomainEvents.dispatchEventsForAggregate(account.id);
                     subscriber.ack(message);
 
@@ -84,38 +83,12 @@ const makeHandler = (subscriber: any, name: string) => async (message: any) => {
                 break;
             case 'Account_Created': {
                 logger.debug(`Account_Created ${JSON.stringify(dataMessage)}`);
-                let account = await accountRepo.findOne({UserId : dataMessage.UserId });
+                let account = await accountRepository.findOne({ UserId: dataMessage.UserId });
                 subscriber.ack(message);
                 logger.debug(`Account_Created ${JSON.stringify(account)}`);
             }
                 break;
-            case 'DexiCash_Reward_Created': {
-                subscriber.ack(message);
 
-                let account = await accountRepo.findOne({UserId : dataMessage.UserId });
-                logger.debug(JSON.stringify(account));
-
-                let game = await accountRepo.findOne({UserId : dataMessage.GameId });
-                logger.debug(JSON.stringify(game));
-                if (account && game) {
-                    // get Id
-                    try {
-                        logger.debug(JSON.stringify(dataMessage));
-
-                        let bankId = await transfer(game.BankId, account.BankId, dataMessage.Amount);
-                        subscriber.ack(message);
-                    } catch (e) {
-                        logger.error(e);
-
-                        subscriber.nack(message);
-                    }
-
-                } else {
-                    logger.error('account not found', dataMessage);
-                    subscriber.nack(message, false, true);
-                }
-            }
-                break;
             default:
                 logger.debug('I dont listen to this message ***** ', dataMessage);
                 subscriber.ack(message);

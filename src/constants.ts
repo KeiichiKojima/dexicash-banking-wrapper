@@ -8,7 +8,7 @@ const DEPOSITS_QUEUE: string = 'DEPOSIT';
 const ORDER_QUEUE: string = 'ORDER';
 const REWARD_QUEUE: string = 'REWARD';
 const ACCOUNT_QUEUE: string = 'ACCOUNT';
-const BANK_API: string = 'http://172.18.0.1:3001';
+const BANK_API: string = 'http://localhost:3001';
 const DEXI_API: string = 'http://localhost:8080';
 
 export {RABBIT_MESSAGE_SERVER,
