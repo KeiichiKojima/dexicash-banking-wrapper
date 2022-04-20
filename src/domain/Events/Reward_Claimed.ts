@@ -1,9 +1,8 @@
 import { IDomainEvent } from '../../core/domain/events/IDomainEvent';
 import { UniqueEntityID } from '../../core/domain/UniqueEntityID';
-import { Deposit } from '../DexiCash/Deposit';
-import { Reward } from '@domain/DexiCash/Reward';
+import { Reward } from '../DexiCash/Reward';
 
-export class Reward_Completed implements IDomainEvent {
+export class Reward_Claimed implements IDomainEvent {
     public key:string[];
     public EventType: string;
     public dateTimeOccurred: Date;
@@ -14,7 +13,7 @@ export class Reward_Completed implements IDomainEvent {
 
         const domainEventClass = Reflect.getPrototypeOf(this);
         this.EventType = domainEventClass.constructor.name;
-        this.key = [`reward.reward_completed`];
+        this.key = [`reward.reward_created`];
         this.dateTimeOccurred = new Date();
         this.RewardId = reward.RewardId;
         this.Id = reward.id

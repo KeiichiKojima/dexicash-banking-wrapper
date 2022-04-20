@@ -75,6 +75,8 @@ const makeHandler = (subscriber:any, name:string) => async (message:any) => {
                 break;
             default:
                 logger.info('I dont listen to this message ***** ', dataMessage);
+                subscriber.ack(message);
+
                 break;
 
         }

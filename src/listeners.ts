@@ -5,6 +5,9 @@ import { Order_Payment_Cancelled, Order_Payment_Completed } from './domain/Event
 import { Reward_Created } from './domain/Events/Reward_Created';
 import { AccountSubscriber } from './services/DexicashAccountService';
 import { Account_Created } from './domain/Events/Account_Created';
+import { Reward_Cancelled } from './domain/Events/Reward_Cancelled';
+import { Reward_Completed } from './domain/Events/Reward_Completed';
+import { DexiCash_Reward_Created } from './domain/Events/DexiCash_Reward_Created';
 const { OrderSubscriber }  = require('./services/DexicashOrderService')
 const { DepositSubscriber }  = require('./services/DexicashDepositService')
 const { RewardSubscriber }  = require('./services/DexicashRewardService')
@@ -49,11 +52,19 @@ const start = async () => {
         await domainPublisher.publish('reward.reward_created',
             JSON.stringify(x));
     }, Reward_Created.name);
+    DomainEvents.register(async (x) => {
+        await domainPublisher.publish('reward.reward_completed',
+            JSON.stringify(x));
+    }, Reward_Completed.name);
+    DomainEvents.register(async (x) => {
+        await domainPublisher.publish('reward.reward_cancelled',
+            JSON.stringify(x));
+    }, Reward_Cancelled.name);
 
     DomainEvents.register(async (x) => {
-        await domainPublisher.publish('account.reward_created',
+        await domainPublisher.publish('account.dexicash_reward_created',
             JSON.stringify(x));
-    }, Reward_Created.name);
+    }, DexiCash_Reward_Created.name);
 
     DomainEvents.register(async (x) => {
         await domainPublisher.publish('account.account_created',

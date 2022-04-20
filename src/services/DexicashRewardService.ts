@@ -37,28 +37,42 @@ const makeHandler = (subscriber:any, name:string) => async (message:any) => {
             }
                 break;
 
+            case 'Make_Claim': {
+
+                logger.info('Make_Claim Message Received', dataMessage);
+                let reward = await rewardRepository.findOne( {RewardId : dataMessage.RewardId });
+                if(reward){
+                    reward.claim(dataMessage.Amount);
+                    await rewardRepository.save(reward);
+                    DomainEvents.dispatchEventsForAggregate(reward.id);
+                    subscriber.ack(message);
+                }else{
+                    logger.error(`Make_Claim ERROR: reward not found`)
+                    subscriber.nack(message);
+                }
+            }
+                break;
             case 'Reward_Created': {
 
                 logger.info('Reward_Created Message Received', dataMessage);
-                logger.debug('*********** ddeposit will be created here **********');
-                let reward = await rewardRepository.findOne( {UserId : dataMessage.UserId });
+                let reward = await rewardRepository.findOne( {RewardId : dataMessage.RewardId });
                 let requestId = await createLootRequest(reward.UserId, reward.GameId).catch(
                     (error) => {
                         throw JSON.stringify(error);
                     },
                 );
-                console.log(requestId)
+
                 let data = await getLootRequest(reward.UserId, "requestId");
-                console.log("!!!!!!!!!!!!!!!!!!!!", data.data.winStatus)
-                if(data.data.winStatus === 'Win'){
-                    reward.complete()
+                if(data.data.winStatus === 'Won'){
+                    console.log("!!!!!!!!!!!!!!!!!!!!", data.data.winStatus, data.data.loot)
+
+                    reward.complete(data.data.loot)
                 }else{
                     reward.cancelled('Lose')
                 }
 
-                console.log("domainEvents", reward.domainEvents, reward.id as UniqueEntityID)
                 await rewardRepository.save(reward);
-                DomainEvents.dispatchEventsForAggregate(reward.id as UniqueEntityID);
+                DomainEvents.dispatchEventsForAggregate(reward.id);
                 /*let userRewards = await rewardRepository.findOne( {UserId : dataMessage.UserId });
                 const total = Object.values(userRewards).reduce((t, {Amount}) => t + Amount, 0)
 
@@ -67,8 +81,15 @@ const makeHandler = (subscriber:any, name:string) => async (message:any) => {
                 //await publisher.publish('orders.command.create_order', JSON.stringify({EventType:'Create_Order', OrderId: '123'}))
             }
                 break;
+            case 'Reward_Cancelled': {
+
+                logger.info('Reward_Cancelled Message Received', dataMessage);
+                subscriber.ack(message);
+                //await publisher.publish('orders.command.create_order', JSON.stringify({EventType:'Create_Order', OrderId: '123'}))
+            }
+                break;
             default:
-                logger.debug('I dont listen to this message ***** ', dataMessage);
+                subscriber.ack(message);
                 break;
 
         }

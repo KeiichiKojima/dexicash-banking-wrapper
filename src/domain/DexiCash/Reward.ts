@@ -5,20 +5,26 @@ import { Reward_Created } from '../Events/Reward_Created';
 import { logger } from '../../services/logger';
 import { Reward_Cancelled } from '../Events/Reward_Cancelled';
 import { Reward_Completed } from '../Events/Reward_Completed';
+import { Reward_Claimed } from '../Events/Reward_Claimed';
+import { DexiCash_Reward_Created } from '../Events/DexiCash_Reward_Created';
+import { Item_Reward_Claimed } from '../Events/Item_Reward_Claimed';
 
 
 export enum Reward_Status {
     Created,
     Cancelled,
-    Completed
+    Completed,
+    Claimed
 }
 
 export interface IDexiCash_Reward {
     RewardId: string;
     GameId: string;
     UserId: string;
-    Amount: number;
+    Amount?: number;
+    Bonus?: number;
     Status?: Reward_Status;
+    Prize?: string;
     StatusReason?: string;
 }
 
@@ -38,8 +44,16 @@ export class Reward extends AggregateRoot<IDexiCash_Reward> {
     get UserId(): string {
         return this.props.UserId;
     }
+    get Bonus(): number {
+        return this.props.Bonus;
+    }
+
     get Amount(): number {
         return this.props.Amount;
+    }
+
+    get Prize(): string {
+        return this.props.Prize;
     }
 
     get Status(): Reward_Status {
@@ -50,7 +64,8 @@ export class Reward extends AggregateRoot<IDexiCash_Reward> {
         return this.props.StatusReason;
     }
 
-    complete() {
+    complete(prize:string) {
+        this.props.Prize = prize;
         this.props.Status = Reward_Status.Completed;
         logger.debug('************ reward completed *************');
         this.addDomainEvent(new Reward_Completed(this));
@@ -63,13 +78,29 @@ export class Reward extends AggregateRoot<IDexiCash_Reward> {
         this.addDomainEvent(new Reward_Cancelled(this));
     }
 
+    claim(amount:number) {
+        if(this.props.Status === Reward_Status.Completed)
+        {
+            this.props.Status = Reward_Status.Claimed;
 
+            logger.debug('************ reward claimed *************');
+            if(this.props.Prize==="624d67b6025ef198c50b9a50"){
+                this.props.Bonus = 2;
+                this.props.Amount = amount * this.props.Bonus;
+                this.addDomainEvent(new DexiCash_Reward_Created(this));
+            }else {
+                this.props.Amount = amount;
+                this.addDomainEvent(new Item_Reward_Claimed(this));
+            }
+        }
+
+    }
     private constructor(props: IDexiCash_Reward, id?: UniqueEntityID) {
         super(props, id);
     }
 
     public static Create(props: IDexiCash_Reward, id?: UniqueEntityID): Reward {
-        props.Status = Reward_Status.Created;
+        props.Status = props.Status || Reward_Status.Created;
         const reward = new Reward({
             ...props,
         }, id);

@@ -1,12 +1,13 @@
 import axios, { AxiosRequestConfig } from 'axios';
 import { logger } from './logger';
-const { DEXI_API } = require('../constants')
 
-const createLootRequest = async (UserId: string,GameId: string) => {
+const { DEXI_API } = require('../constants');
+
+const createLootRequest = async (UserId: string, GameId: string) => {
     var data = JSON.stringify({
-        "message_type": "create_loot_request",
-        "userId" : UserId,
-        "game": GameId
+        'message_type': 'create_loot_request',
+        'userId': UserId,
+        'game': GameId,
     });
     logger.debug(`********** create_loot_request ${JSON.stringify(data)}`);
 
@@ -24,24 +25,50 @@ const createLootRequest = async (UserId: string,GameId: string) => {
     });
     logger.info(`create ${JSON.stringify(response)}`);*/
 
-    let lootRequestId = "625f6f1b26b3ce2bdcbc46e2";
+    let lootRequestId = '625f6f1b26b3ce2bdcbc46e2';
     logger.debug(`********** end create ${lootRequestId}`);
     return lootRequestId;
 };
 
 const getLootRequest = async (UserId: string, RequestId: string) => {
-    return {
-        "status": 200,
-        "data": {
-            "_id": "625f6f1b26b3ce2bdcbc46e2",
-            "user": "625ccf96c48a4b5765cad816",
-            "winStatus": "Lose",
-            "loot": null,
-            "createdAt": "2022-04-20T02:25:31.451Z",
-            "updatedAt": "2022-04-20T02:25:31.451Z",
-            "__v": 0
-        }
-    }
+    let prizes = [
+        {
+            'status': 200,
+            'data': {
+                '_id': '625f6f1b26b3ce2bdcbc46e2',
+                'user': '625ccf96c48a4b5765cad816',
+                'winStatus': 'Lose',
+                'loot': null,
+                'createdAt': '2022-04-20T02:25:31.451Z',
+                'updatedAt': '2022-04-20T02:25:31.451Z',
+                '__v': 0,
+            },
+        }, {
+            'status': 200,
+            'data': {
+                '_id': '625f6f1b26b3ce2bdcbc46e2',
+                'user': '625ccf96c48a4b5765cad816',
+                'winStatus': 'Won',
+                'loot': '624d68ce025ef198c50b9a54',
+                'createdAt': '2022-04-20T02:25:31.451Z',
+                'updatedAt': '2022-04-20T02:25:31.451Z',
+                '__v': 0,
+            },
+        }, {
+            'status': 200,
+            'data': {
+                '_id': '625f6f1b26b3ce2bdcbc46e2',
+                'user': '625ccf96c48a4b5765cad816',
+                // DEXI x2
+                'winStatus': 'Won',
+                'loot': '624d67b6025ef198c50b9a50',
+                'createdAt': '2022-04-20T02:25:31.451Z',
+                'updatedAt': '2022-04-20T02:25:31.451Z',
+                '__v': 0,
+            },
+        }];
+    //DEXICASH x2
+    return prizes[2];
 
     var config: AxiosRequestConfig = {
         method: 'get', url: `${DEXI_API}/v1/accounts`,

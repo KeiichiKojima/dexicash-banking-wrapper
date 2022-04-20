@@ -15,7 +15,7 @@ export class Reward_Cancelled implements IDomainEvent {
 
         const domainEventClass = Reflect.getPrototypeOf(this);
         this.EventType = domainEventClass.constructor.name;
-        this.key = [`deposit.deposit_created`];
+        this.key = [`reward.reward_cancelled`];
         this.dateTimeOccurred = new Date();
         this.RewardId = reward.RewardId;
         this.Reason = reward.StatusReason;

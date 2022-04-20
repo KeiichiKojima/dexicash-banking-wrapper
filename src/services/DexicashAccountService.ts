@@ -89,10 +89,10 @@ const makeHandler = (subscriber: any, name: string) => async (message: any) => {
                 logger.debug(`Account_Created ${JSON.stringify(account)}`);
             }
                 break;
-            case 'Reward_Created': {
+            case 'DexiCash_Reward_Created': {
                 subscriber.ack(message);
 
-                /*let account = await accountRepo.findOne({UserId : dataMessage.UserId });
+                let account = await accountRepo.findOne({UserId : dataMessage.UserId });
                 logger.debug(JSON.stringify(account));
 
                 let game = await accountRepo.findOne({UserId : dataMessage.GameId });
@@ -113,11 +113,12 @@ const makeHandler = (subscriber: any, name: string) => async (message: any) => {
                 } else {
                     logger.error('account not found', dataMessage);
                     subscriber.nack(message, false, true);
-                }*/
+                }
             }
                 break;
             default:
                 logger.debug('I dont listen to this message ***** ', dataMessage);
+                subscriber.ack(message);
                 break;
 
         }

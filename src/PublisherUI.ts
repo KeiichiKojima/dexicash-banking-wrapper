@@ -3,7 +3,7 @@
 import { Order_Payment_Completed } from './domain/Events/Order_Payment';
 
 const { logger } = require('./services/logger');
-const { RABBIT_MESSAGE_SERVER, exchange } = require('./constants')
+const { RABBIT_MESSAGE_SERVER, exchange } = require('./constants');
 
 const { makePublisher } = require('amqp-simple-pub-sub');
 import { Order, Order_Status } from './domain/DexiCash/Order';
@@ -17,6 +17,11 @@ const {
     RABBIT_CHANNEL: CHANNEL,
 } = process.env;
 
+function sleep(ms: number) {
+    return new Promise((resolve) => {
+        setTimeout(resolve, ms);
+    });
+}
 
 const publisher = makePublisher({
     type: 'topic', // the default
@@ -28,6 +33,7 @@ DomainEvents.register(async (x) => {
     ;await publisher.publish(x.key[0], JSON.stringify(x));
 }, Order_Created.name);
 let orderNumber = Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 5);
+let rewardId = Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 5);
 let dexiId = 'Michael';
 (async () => {
     await publisher.start();
@@ -84,8 +90,8 @@ process.stdin.on('keypress', (str, key) => {
                     break;
 
                 case 'r': {
-                    let rewardId = Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 5);
-                    dexiId='625ccf96c48a4b5765cad816'
+                    rewardId = Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 5);
+                    dexiId = '625ccf96c48a4b5765cad816';
                     event = JSON.stringify({
                         EventType: 'Create_Reward',
                         RewardId: rewardId,
@@ -94,25 +100,32 @@ process.stdin.on('keypress', (str, key) => {
                         Amount: 500,
                     });
                     await publisher.publish('reward.command.create_reward', event);
+                    await sleep(1000);
+                    event = JSON.stringify({
+                        EventType: 'Make_Claim',
+                        RewardId: rewardId,
+                        Amount: 500,
+                    });
+                    await publisher.publish('reward.command.make_claim', event);
                 }
                     break;
                 case 's': {
 
-                    let games = [ {GameId: '6238849ffffcdebf2f62e1f6'}]
-                    games.map(async (gameId)=>{
+                    let games = [{ GameId: '6238849ffffcdebf2f62e1f6' }];
+                    games.map(async (gameId) => {
                         event = JSON.stringify({
                             EventType: 'Create_Game_Account',
-                            UserId: gameId.GameId
+                            UserId: gameId.GameId,
                         });
                         await publisher.publish('account.command.create_account', event);
-                    })
+                    });
                 }
                     break;
                 case 'u': {
                     dexiId = Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 5);
                     event = JSON.stringify({
                         EventType: 'Create_Account',
-                        UserId: dexiId
+                        UserId: dexiId,
                     });
                     await publisher.publish('account.command.create_account', event);
                 }
