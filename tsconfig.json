@@ -6,7 +6,7 @@
     "target": "es6",
     "noImplicitAny": true,
     "sourceMap": true,
-    "outDir": "dists",
+    "outDir": "dist",
     "baseUrl": "src",
     "paths": {
       "@services/*": ["services/*"],
@@ -17,5 +17,5 @@
     }
   },
   "include": ["src/**/*.ts"],
-  "exclude": ["node_modues"],
+  "exclude": ["node_modues"]
 }

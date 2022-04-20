@@ -5,8 +5,8 @@
   "author": "Keiichi <keiichikojima365@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "build": "rm -rf dist && tsc",
-    "start": "rm -rf dist && tsc && node .",
+    "build": "rm -rf dist && tsc && tscpaths -p tsconfig.json -s ./src -o ./dist",
+    "start": "rm -rf dist && tsc && tscpaths -p tsconfig.json -s ./src -o ./dist && node .",
     "dev": "nodemon",
     "test": "mocha -r ts-node/register 'tests/**/*.ts' "
   },
@@ -35,6 +35,7 @@
     "nodemon": "^2.0.15",
     "ts-node": "^10.7.0",
     "tsconfig-paths": "^3.14.1",
+    "tscpaths": "^0.0.9",
     "typescript": "^4.6.3"
   }
 }
