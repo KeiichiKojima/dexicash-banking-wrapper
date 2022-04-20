@@ -9,8 +9,8 @@ export class RewardRepository extends BaseRepository<IDexiCash_Reward, Reward> i
         if (!findOneRes) {
             return null;
         }
-
-        return Reward.Create(findOneRes.props, findOneRes.id);
+        let id = JSON.parse(JSON.stringify(findOneRes))._id;
+        return Reward.Create(findOneRes.props, id.value);
     }
 
     async find(filter: Partial<Reward>): Promise<Reward[]> {

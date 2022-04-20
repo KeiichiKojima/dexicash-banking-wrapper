@@ -10,7 +10,8 @@ export class AccountRepository extends BaseRepository<IDexiCash_Account, Account
             return null;
         }
 
-        return Account.Create(findOneRes.props, findOneRes.id);
+        let id = JSON.parse(JSON.stringify(findOneRes))._id;
+        return Account.Create(findOneRes.props, id);
     }
 
     async find(filter: Partial<Account>): Promise<Account[]> {

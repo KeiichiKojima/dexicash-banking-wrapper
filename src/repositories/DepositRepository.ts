@@ -10,7 +10,8 @@ export class DepositRepository extends BaseRepository<IDexiCash_Deposit, Deposit
             return null;
         }
 
-        return Deposit.Create(findOneRes.props, findOneRes.id);
+        let id = JSON.parse(JSON.stringify(findOneRes))._id;
+        return Deposit.Create(findOneRes.props, id);
     }
 
     async find(filter: Partial<Deposit>): Promise<Deposit[]> {

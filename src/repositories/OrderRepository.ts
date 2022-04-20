@@ -10,7 +10,8 @@ export class OrderRepository extends BaseRepository<IDexiCash_Order, Order> impl
             return null;
         }
 
-        return Order.Create(findOneRes.props, findOneRes.id);
+        let id = JSON.parse(JSON.stringify(findOneRes))._id;
+        return Order.Create(findOneRes.props, id);
     }
 
     async find(filter: Partial<Order>): Promise<Order[]> {

@@ -10,7 +10,8 @@ export class RedemptionRepository extends BaseRepository<IDexiCash_Redemption, R
             return null;
         }
 
-        return Redemption.Create(findOneRes.props, findOneRes.id);
+        let id = JSON.parse(JSON.stringify(findOneRes))._id;
+        return Redemption.Create(findOneRes.props, id);
     }
 
     async find(filter: Partial<Redemption>): Promise<Redemption[]> {
