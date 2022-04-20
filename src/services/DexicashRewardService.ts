@@ -5,6 +5,7 @@ import { Order, Order_Status } from '../domain/DexiCash/Order';
 import { Order_Created } from '../domain/Events/Order_Created';
 import { DomainEvents } from '../core/domain/events/DomainEvents';
 import { Deposit } from '../domain/DexiCash/Deposit';
+import { RewardRepository } from '../repositories/RewardRepository';
 
 require('dotenv').config();
 const {
@@ -14,7 +15,7 @@ const {
 
 const { logger } = require('../services/logger');
 
-let rewards: any = [];
+let rewardRepository:RewardRepository = new RewardRepository();
 
 const makeHandler = (subscriber:any, name:string) => async (message:any) => {
     try {
@@ -26,7 +27,7 @@ const makeHandler = (subscriber:any, name:string) => async (message:any) => {
             case 'Create_Reward': {
                 logger.debug('I DO listen to this message ###### ', dataMessage);
                 let reward = Reward.Create({ Amount: dataMessage.Amount, GameId: dataMessage.GameId, UserId: dataMessage.UserId, RewardId: dataMessage.RewardId });
-                rewards.push(reward);
+                await rewardRepository.save(reward);
                 DomainEvents.dispatchEventsForAggregate(reward.id);
 
                 subscriber.ack(message);
@@ -36,9 +37,7 @@ const makeHandler = (subscriber:any, name:string) => async (message:any) => {
             case 'Reward_Created': {
 
                 logger.debug('*********** ddeposit will be created here **********');
-                let userRewards = rewards.filter( (x:any)=>{
-                    return x.UserId === dataMessage.UserId
-                });
+                let userRewards = await rewardRepository.findOne( {UserId : dataMessage.UserId });
                 const total = Object.values(userRewards).reduce((t, {Amount}) => t + Amount, 0)
 
                 logger.debug(`Balance for ${dataMessage.UserId} is ${ total || 0}`)

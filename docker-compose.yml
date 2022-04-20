@@ -1,24 +1,37 @@
-version: "3.7"
+version: "3.9"
 
 services:
   rabbitmq:
     image: "rabbitmq:3-management"
     ports:
-      #- "5672:5672"
-      - "15673:15672"
+      - "5672:5672"
+      - "15672:15672"
     networks:
       - dexi-gateway
     restart: unless-stopped
-  dexicash:
-    image: "dexi/dexicash:latest"
-    links:
-      - "rabbitmq:dexi-rabbitmq"
+  gateway:
+    image: "487111956536.dkr.ecr.us-east-1.amazonaws.com/dexi/gateway:latest"
+    ports:
+      - '8080:8080'
     depends_on:
       - rabbitmq
+    links:
+      - "rabbitmq:dexi-rabbitmq"
+    networks:
+      - dexi-gateway
+    restart: unless-stopped
+  saga:
+    image: "487111956536.dkr.ecr.us-east-1.amazonaws.com/dexi/saga_manager:latest"
+    depends_on:
+      - rabbitmq
+    links:
+      - "rabbitmq:dexi-rabbitmq"
     networks:
       - dexi-gateway
     restart: unless-stopped
 networks:
   dexi-gateway:
-    driver: overlay
-    attachable: true
+    driver:
+      overlay
+    attachable:
+      true

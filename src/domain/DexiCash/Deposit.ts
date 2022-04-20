@@ -1,7 +1,9 @@
 import { AggregateRoot } from '../../core/domain/AggregateRoot';
 import { UniqueEntityID } from '../../core/domain/UniqueEntityID';
-import { Deposit_Created } from '../Events/Deposit_Created';
+import { Deposit_Created  } from '../Events/Deposit_Created';
 import { logger } from '../../services/logger';
+import { Deposit_Cancelled } from '../Events/Deposit_Cancelled';
+import { Order_Payment_Cancelled } from '@domain/Events/Order_Payment';
 
 
 export enum Deposit_Status {
@@ -35,13 +37,16 @@ export class Deposit extends AggregateRoot<IDexiCash_Deposit> {
 
     complete() {
         this.props.Status = Deposit_Status.Completed;
-        logger.debug('************ order completed *************');
+        logger.debug('************ deposit completed *************');
+        this.addDomainEvent(new Deposit_Cancelled(this));
+
     }
 
     cancelled(reason: string) {
         this.props.Status = Deposit_Status.Cancelled;
         this.props.StatusReason = reason;
-        logger.debug('************ order cancelled *************');
+        logger.debug('************ deposit cancelled *************');
+        this.addDomainEvent(new Deposit_Cancelled(this));
     }
 
 

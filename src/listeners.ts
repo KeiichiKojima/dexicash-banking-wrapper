@@ -30,10 +30,10 @@ const start = async () => {
         await domainPublisher.publish('deposit.order_created',
             JSON.stringify(x));
     }, Order_Created.name);
-    DomainEvents.register(async (x) => {
+    /*DomainEvents.register(async (x) => {
         await domainPublisher.publish('deposit.deposit_created',
             JSON.stringify(x));
-    }, Deposit_Created.name);
+    }, Deposit_Created.name);*/
 
     DomainEvents.register(async (x) => {
         await domainPublisher.publish('deposit.order_cancelled',

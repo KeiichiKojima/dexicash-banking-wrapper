@@ -6,6 +6,7 @@ import { Order_Created } from '../domain/Events/Order_Created';
 import { DomainEvents } from '../core/domain/events/DomainEvents';
 import { Deposit } from '../domain/DexiCash/Deposit';
 import { create, getaccount, transfer } from '../services/GoBankingService';
+import { AccountRepository } from '../repositories/AccountRepository';
 
 var axios = require('axios');
 require('dotenv').config();
@@ -15,7 +16,7 @@ const {
 } = process.env;
 
 const { logger } = require('../services/logger');
-let accounts: any = [];
+let accountRepo = new AccountRepository()
 
 const makeHandler = (subscriber: any, name: string) => async (message: any) => {
     try {
@@ -37,10 +38,9 @@ const makeHandler = (subscriber: any, name: string) => async (message: any) => {
                     );
 
                     account.assign(bankId);
-                    accounts.push(account);
+                    await accountRepo.save(account);
                     DomainEvents.dispatchEventsForAggregate(account.id);
-                    logger.debug(accounts.length);
-                    logger.debug(`********* Finished Create_Account ${JSON.stringify(accounts)}`);
+                    logger.debug(`********* Finished Create_Account ${JSON.stringify(accountRepo)}`);
 
                 } catch (error: any) {
                     logger.error(error);
@@ -69,7 +69,7 @@ const makeHandler = (subscriber: any, name: string) => async (message: any) => {
                         },
                     );
                     account.assign(bankId);
-                    accounts.push(account);
+                    await accountRepo.save(account);
                     DomainEvents.dispatchEventsForAggregate(account.id);
                     subscriber.ack(message);
 
@@ -83,17 +83,17 @@ const makeHandler = (subscriber: any, name: string) => async (message: any) => {
                 break;
             case 'Account_Created': {
                 logger.debug(`Account_Created ${JSON.stringify(dataMessage)}`);
-                let account = accounts.find((x: any) => x.UserId === dataMessage.UserId);
-
+                let account = await accountRepo.findOne({UserId : dataMessage.UserId });
                 subscriber.ack(message);
                 logger.debug(`Account_Created ${JSON.stringify(account)}`);
             }
                 break;
             case 'Reward_Created': {
-                let account = accounts.find((x: any) => x.UserId === dataMessage.UserId);
+
+                let account = await accountRepo.findOne({UserId : dataMessage.UserId });
                 logger.debug(JSON.stringify(account));
 
-                let game = accounts.find((x: any) => x.UserId === dataMessage.GameId);
+                let game = await accountRepo.findOne({UserId : dataMessage.GameId });
                 logger.debug(JSON.stringify(game));
                 if (account && game) {
                     // get Id

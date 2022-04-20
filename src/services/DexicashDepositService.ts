@@ -1,3 +1,4 @@
+import { DepositRepository } from '../repositories/DepositRepository';
 
 const { makePublisher } = require('amqp-simple-pub-sub');
 import { Order, Order_Status } from '../domain/DexiCash/Order';
@@ -13,7 +14,8 @@ const {
 
 const { logger } = require('../services/logger');
 
-let deposits: any = [];
+
+let depositRepository = new DepositRepository()
 
 const makeHandler = (subscriber:any, name:string) => async (message:any) => {
     try {
@@ -21,34 +23,18 @@ const makeHandler = (subscriber:any, name:string) => async (message:any) => {
 
         logger.info('Message Received', dataMessage);
         switch (dataMessage.EventType) {
-            case 'Create_Deposit': {
-                logger.debug(`I DO listen to this message ###### : ${dataMessage.EventType}`);
-                console.log(dataMessage.EventType);
-
+            /*case 'Create_Deposit': {
                 let deposit = Deposit.Create({ OrderId: dataMessage.OrderId });
-                deposits.push(deposit);
+                await depositRepository.save(deposit);
                 DomainEvents.dispatchEventsForAggregate(deposit.id);
-                logger.debug(deposits.length);
                 subscriber.ack(message);
             }
-                break;
-            case 'Deposit_Created': {
-                logger.debug(`I DO listen to this message ###### : ${dataMessage.EventType}`);
-                let deposit = deposits.find((x: any) => x.OrderId === dataMessage.OrderId);
-                console.log(JSON.stringify(deposits));
-                subscriber.ack(message);
-            }
-                break;
-
+                break;*/
             case 'Order_Created': {
-                logger.debug(`I DO listen to this message ###### : ${dataMessage.EventType}`);
                 let deposit = Deposit.Create({ OrderId: dataMessage.OrderId });
-                console.log(`${dataMessage.EventType} ${JSON.stringify(deposit)}`);
-
-                deposits.push(deposit);
+                await depositRepository.save(deposit);
 
                 DomainEvents.dispatchEventsForAggregate(deposit.id);
-                logger.debug(deposits.length);
 
                 subscriber.ack(message);
                 //await publisher.publish('orders.command.create_order', JSON.stringify({EventType:'Create_Order', OrderId: '123'}))
@@ -57,12 +43,13 @@ const makeHandler = (subscriber:any, name:string) => async (message:any) => {
 
             case 'Order_Payment_Completed': {
 
-                logger.info('Order_Completed ***** ', dataMessage);
-                let deposit = deposits.find((x: any) => x.OrderId === dataMessage.OrderId);
+                let deposit = await depositRepository.findOne( { OrderId : dataMessage.OrderId});
                 if (deposit) {
                     deposit.complete();
+                    await depositRepository.save(deposit)
                     DomainEvents.dispatchEventsForAggregate(deposit.id);
                     logger.debug(deposit);
+                    logger.info('deposit_Completed ***** ', dataMessage);
                     subscriber.ack(message);
                 } else {
                     logger.error('deposit not found', dataMessage);
@@ -72,12 +59,13 @@ const makeHandler = (subscriber:any, name:string) => async (message:any) => {
                 break;
 
             case 'Order_Payment_Cancelled': {
-                logger.info('Order_Cancelled ***** ', dataMessage);
-                let deposit = deposits.find((x: any) => x.OrderId === dataMessage.OrderId);
+                let deposit = await depositRepository.findOne( { OrderId : dataMessage.OrderId});
                 if (deposit) {
                     deposit.cancelled(dataMessage.Reason);
+                    await depositRepository.save(deposit)
                     DomainEvents.dispatchEventsForAggregate(deposit.id);
                     logger.debug(deposit);
+                    logger.info('deposit_Cancelled ***** ', dataMessage);
                     subscriber.ack(message);
                 } else {
                     logger.error('deposit not found', dataMessage);
