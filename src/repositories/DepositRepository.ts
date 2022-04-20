@@ -1,6 +1,7 @@
 import { BaseRepository } from './BaseRepository';
 import { Deposit, IDexiCash_Deposit } from '../domain/DexiCash/Deposit';
 import { IReadObject } from './interfaces/IRead';
+import { UniqueEntityID } from '../core/domain/UniqueEntityID';
 
 export class DepositRepository extends BaseRepository<IDexiCash_Deposit, Deposit> implements IReadObject<Deposit> {
     async findOne(filter: Partial<IDexiCash_Deposit>): Promise<Deposit | null> {
@@ -10,8 +11,8 @@ export class DepositRepository extends BaseRepository<IDexiCash_Deposit, Deposit
             return null;
         }
 
-        let id = JSON.parse(JSON.stringify(findOneRes))._id;
-        return Deposit.Create(findOneRes.props, id);
+        let id = JSON.parse(JSON.stringify(findOneRes))._id.value;
+        return Deposit.Create(findOneRes.props,  new UniqueEntityID(id));
     }
 
     async find(filter: Partial<Deposit>): Promise<Deposit[]> {

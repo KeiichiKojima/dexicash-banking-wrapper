@@ -16,7 +16,7 @@ const makeHandler = (subscriber: any, name: string) => async (message: any) => {
     try {
         let dataMessage = JSON.parse(Buffer.from(message.content).toString());
 
-        logger.info('Message Received', dataMessage);
+        logger.info(`Message Received by ${name}: dataMessage`);
         switch (dataMessage.EventType) {
             case 'Create_Order': {
                 let order = await ordersRepo.findOne({ OrderId: dataMessage.OrderId });

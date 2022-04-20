@@ -85,6 +85,7 @@ process.stdin.on('keypress', (str, key) => {
 
                 case 'r': {
                     let rewardId = Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 5);
+                    dexiId='625ccf96c48a4b5765cad816'
                     event = JSON.stringify({
                         EventType: 'Create_Reward',
                         RewardId: rewardId,

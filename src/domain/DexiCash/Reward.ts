@@ -3,6 +3,8 @@ import { UniqueEntityID } from '../../core/domain/UniqueEntityID';
 import { Deposit_Created } from '../Events/Deposit_Created';
 import { Reward_Created } from '../Events/Reward_Created';
 import { logger } from '../../services/logger';
+import { Reward_Cancelled } from '../Events/Reward_Cancelled';
+import { Reward_Completed } from '../Events/Reward_Completed';
 
 
 export enum Reward_Status {
@@ -50,13 +52,15 @@ export class Reward extends AggregateRoot<IDexiCash_Reward> {
 
     complete() {
         this.props.Status = Reward_Status.Completed;
-        logger.debug('************ order completed *************');
+        logger.debug('************ reward completed *************');
+        this.addDomainEvent(new Reward_Completed(this));
     }
 
     cancelled(reason: string) {
         this.props.Status = Reward_Status.Cancelled;
         this.props.StatusReason = reason;
-        logger.debug('************ order cancelled *************');
+        logger.debug('************ reward cancelled *************');
+        this.addDomainEvent(new Reward_Cancelled(this));
     }
 
 
@@ -80,7 +84,6 @@ export class Reward extends AggregateRoot<IDexiCash_Reward> {
             // closer at this.
             reward.addDomainEvent(new Reward_Created(reward));
         }
-
         return reward;
     }
 

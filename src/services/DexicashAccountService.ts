@@ -22,7 +22,8 @@ const makeHandler = (subscriber: any, name: string) => async (message: any) => {
     try {
         let dataMessage = JSON.parse(Buffer.from(message.content).toString());
 
-        logger.info('Message Received', dataMessage);
+
+        logger.info(`Message Received by ${name}: dataMessage`);
         switch (dataMessage.EventType) {
             case 'Create_Account': {
 
@@ -89,8 +90,9 @@ const makeHandler = (subscriber: any, name: string) => async (message: any) => {
             }
                 break;
             case 'Reward_Created': {
+                subscriber.ack(message);
 
-                let account = await accountRepo.findOne({UserId : dataMessage.UserId });
+                /*let account = await accountRepo.findOne({UserId : dataMessage.UserId });
                 logger.debug(JSON.stringify(account));
 
                 let game = await accountRepo.findOne({UserId : dataMessage.GameId });
@@ -111,7 +113,7 @@ const makeHandler = (subscriber: any, name: string) => async (message: any) => {
                 } else {
                     logger.error('account not found', dataMessage);
                     subscriber.nack(message, false, true);
-                }
+                }*/
             }
                 break;
             default:
