@@ -8,13 +8,15 @@ import { Reward_Completed } from '../Events/Reward_Completed';
 import { Reward_Claimed } from '../Events/Reward_Claimed';
 import { DexiCash_Reward_Created } from '../Events/DexiCash_Reward_Created';
 import { Item_Reward_Claimed } from '../Events/Item_Reward_Claimed';
+import { Reward_Authorised } from '../Events/Reward_Authorised';
 
 
 export enum Reward_Status {
     Created,
     Cancelled,
-    Completed,
-    Claimed
+    Authorised,
+    Claimed,
+    Completed
 }
 
 export interface IDexiCash_Reward {
@@ -64,8 +66,14 @@ export class Reward extends AggregateRoot<IDexiCash_Reward> {
         return this.props.StatusReason;
     }
 
-    complete(prize:string) {
+    authorised(prize:string) {
         this.props.Prize = prize;
+        this.props.Status = Reward_Status.Authorised;
+        logger.debug('************ reward authorised *************');
+        this.addDomainEvent(new Reward_Authorised(this));
+    }
+
+    completed() {
         this.props.Status = Reward_Status.Completed;
         logger.debug('************ reward completed *************');
         this.addDomainEvent(new Reward_Completed(this));
@@ -79,7 +87,7 @@ export class Reward extends AggregateRoot<IDexiCash_Reward> {
     }
 
     claim(amount:number) {
-        if(this.props.Status === Reward_Status.Completed)
+        if(this.props.Status === Reward_Status.Authorised)
         {
             this.props.Status = Reward_Status.Claimed;
 

@@ -5,6 +5,7 @@ import { Order, Order_Status } from '../domain/DexiCash/Order';
 import { Order_Created } from '../domain/Events/Order_Created';
 import { DomainEvents } from '../core/domain/events/DomainEvents';
 import { Deposit } from '../domain/DexiCash/Deposit';
+import { depositRepository } from '../repositories';
 
 require('dotenv').config();
 const {
@@ -13,9 +14,6 @@ const {
 } = process.env;
 
 const { logger } = require('../services/logger');
-
-
-let depositRepository = new DepositRepository()
 
 const makeHandler = (subscriber:any, name:string) => async (message:any) => {
     try {
