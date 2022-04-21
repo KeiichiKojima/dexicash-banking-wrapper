@@ -1,9 +1,13 @@
 import { BaseRepository } from './BaseRepository';
 import { Order, IDexiCash_Order } from '../domain/DexiCash/Order';
 import { IReadObject } from './interfaces/IRead';
-import { UniqueEntityID } from '../core/domain/UniqueEntityID';
+import OrderModel from '../database/models/order.model';
 
 export class OrderRepository extends BaseRepository<IDexiCash_Order, Order> implements IReadObject<Order> {
+    constructor() {
+        super(OrderModel);
+    }
+
     async findOne(filter: Partial<Order>): Promise<Order | null> {
         const findOneRes = await this._findOne(filter);
 
@@ -11,9 +15,7 @@ export class OrderRepository extends BaseRepository<IDexiCash_Order, Order> impl
             return null;
         }
 
-
-        let id = JSON.parse(JSON.stringify(findOneRes))._id.value;
-        return Order.Create(findOneRes.props,  new UniqueEntityID(id));
+        return Order.Create(findOneRes.props, findOneRes.id);
     }
 
     async find(filter: Partial<Order>): Promise<Order[]> {

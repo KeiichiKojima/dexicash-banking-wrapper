@@ -1,12 +1,21 @@
 import { DepositRepository } from '../../src/repositories/DepositRepository';
 import { Deposit, Deposit_Status } from '../../src/domain/DexiCash/Deposit';
 import { expect } from 'chai';
+import "dotenv/config";
+import DepositModel from '../../src/database/models/deposit.model';
 
 describe('Deposit Repo tests', () => {
     const depositRepo = new DepositRepository();
 
     const deposit1 = Deposit.Create({ OrderId: "1", StatusReason: "no reason" });
     const deposit2 = Deposit.Create({ OrderId: "2", StatusReason: "no reasons" });
+
+    before(async () => {
+        const connectMongo = require('../../src/connectMongo').default;
+        await connectMongo();
+
+        await DepositModel.remove({});
+    });
 
     it('create', async () => {
         expect(await depositRepo.create(deposit1), "Create deposit 1").to.be.true;

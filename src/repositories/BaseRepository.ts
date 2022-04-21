@@ -2,53 +2,72 @@ import { IRepository } from './interfaces/IRepository';
 import { isMatch } from 'lodash';
 import { AggregateRoot } from '../core/domain/AggregateRoot';
 import { UniqueEntityID } from '../core/domain/UniqueEntityID';
+import mongoose from 'mongoose';
+import { IDomainModel } from '@domain/interfaces/IDomainModel';
 
 export abstract class BaseRepository<Q extends Object, T extends AggregateRoot<Q>> implements IRepository<T> {
-    private documents: Record<string, string>;
+    private model: mongoose.Model<IDomainModel>;
 
-    constructor() {
-        this.documents = {};
+    constructor(_model: mongoose.Model<IDomainModel>) {
+        this.model = _model;
     }
 
     async create(item: T): Promise<boolean> {
-        if (!this.documents[item.id.toString()]) {
-            this.documents[item.id.toString()] = JSON.stringify(item);
+        const entityId = item.id.toString();
+
+        try {
+            await this.model.create({
+                entityId,
+                objectJson: item,
+            });
 
             return true;
+        } catch {
+            return false;
+        }
+    }
+
+    private getDbFilter(filter: Partial<T>): Record<string, any> {
+        const dbFilter: Record<string, any> = {};
+
+        for (let key in filter) {
+            dbFilter[`objectJson.props.${key}`] = filter[key];
         }
 
-        return false;
+        return dbFilter;
     }
 
     async _findOne(filter: Partial<T>): Promise<T | null> {
-        for (let id in this.documents) {
-            const obj = JSON.parse(this.documents[id]) as T;
+        const dbFilter = this.getDbFilter(filter);
 
-            if (isMatch(obj.props, filter)) {
-                return obj;
-            }
+        const res = await this.model.findOne(dbFilter);
+
+        if (!res) {
+            return null;
         }
 
-        return null;
+        const result = { ...res.toObject().objectJson, id: new UniqueEntityID(res.entityId) };
+
+        return result as T;
     }
 
     async _find(filter: Partial<T>): Promise<T[]> {
-        const docs: T[] = [];
+        const dbFilter = this.getDbFilter(filter);
 
-        for (let id in this.documents) {
-            const obj = JSON.parse(this.documents[id]);
+        const r = await this.model.find(dbFilter);
 
-            if (isMatch(obj.props, filter)) {
-                docs.push(obj);
-            }
-        }
-
-        return docs;
+        return r.map((item) => ({ ...item.toObject().objectJson, id: new UniqueEntityID(item.entityId) } as T));
     }
 
     async update(id: UniqueEntityID, item: T): Promise<boolean> {
+        const entityId = id.toString();
+
         try {
-            this.documents[id.toString()] = JSON.stringify(item);
+            await this.model.findOneAndUpdate({
+                entityId
+            }, {
+                objectJson: item
+            })
 
             return true;
         } catch {
@@ -61,8 +80,12 @@ export abstract class BaseRepository<Q extends Object, T extends AggregateRoot<Q
     }
 
     async delete(id: UniqueEntityID): Promise<boolean> {
+        const entityId = id.toString();
+
         try {
-            delete this.documents[id.toString()];
+            await this.model.deleteOne({
+                entityId
+            });
 
             return true;
         } catch {

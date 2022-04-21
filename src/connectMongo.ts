@@ -1,4 +1,4 @@
-import dbConfig from '@database/config';
+import dbConfig from './database/config';
 import mongoose from 'mongoose';
 
 const connectMongo = () => {

@@ -1,6 +1,8 @@
 import { AccountRepository } from '../../src/repositories/AccountRepository';
 import { Account, Account_Status } from '../../src/domain/DexiCash/Account';
 import { expect } from 'chai';
+import "dotenv/config";
+import AccountModel from '../../src/database/models/account.model';
 
 describe('Account Repo tests', () => {
     const accountRepo = new AccountRepository();
@@ -12,6 +14,13 @@ describe('Account Repo tests', () => {
         expect(await accountRepo.create(account1), "Create account 1").to.be.true;
 
         expect(await accountRepo.create(account2), "Create account 2").to.be.true;
+    });
+
+    before(async () => {
+        const connectMongo = require('../../src/connectMongo').default;
+        await connectMongo();
+
+        await AccountModel.remove({});
     });
 
     it('update', async () => {
