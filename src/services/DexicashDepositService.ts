@@ -5,6 +5,7 @@ import { Order, Order_Status } from '../domain/DexiCash/Order';
 import { Order_Created } from '../domain/Events/Order_Created';
 import { DomainEvents } from '../core/domain/events/DomainEvents';
 import { Deposit } from '../domain/DexiCash/Deposit';
+import { depositRepository } from '../repositories';
 
 require('dotenv').config();
 const {
@@ -14,14 +15,11 @@ const {
 
 const { logger } = require('../services/logger');
 
-
-let depositRepository = new DepositRepository()
-
 const makeHandler = (subscriber:any, name:string) => async (message:any) => {
     try {
         let dataMessage = JSON.parse(Buffer.from(message.content).toString());
 
-        logger.info('Message Received', dataMessage);
+        logger.info(`Message Received by ${name}: dataMessage`);
         switch (dataMessage.EventType) {
             /*case 'Create_Deposit': {
                 let deposit = Deposit.Create({ OrderId: dataMessage.OrderId });
@@ -75,6 +73,8 @@ const makeHandler = (subscriber:any, name:string) => async (message:any) => {
                 break;
             default:
                 logger.info('I dont listen to this message ***** ', dataMessage);
+                subscriber.ack(message);
+
                 break;
 
         }

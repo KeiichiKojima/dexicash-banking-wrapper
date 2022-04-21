@@ -55,7 +55,7 @@ export class Deposit extends AggregateRoot<IDexiCash_Deposit> {
     }
 
     public static Create(props: IDexiCash_Deposit, id?: UniqueEntityID): Deposit {
-        props.Status = Deposit_Status.Created;
+        props.Status = props.Status ||  Deposit_Status.Created;
         const deposit = new Deposit({
             ...props,
         }, id);

@@ -2,6 +2,7 @@ import { Order, Order_Status } from '../domain/DexiCash/Order';
 import { DomainEvents } from '../core/domain/events/DomainEvents';
 import OrderModel from '@database/models/order.model';
 import { OrderRepository } from '../repositories/OrderRepository';
+import { ordersRepository } from '../repositories';
 
 require('dotenv').config();
 const {
@@ -10,21 +11,20 @@ const {
 } = process.env;
 
 const { logger } = require('../services/logger');
-const ordersRepo = new OrderRepository()
 
 const makeHandler = (subscriber: any, name: string) => async (message: any) => {
     try {
         let dataMessage = JSON.parse(Buffer.from(message.content).toString());
 
-        logger.info('Message Received', dataMessage);
+        logger.info(`Message Received by ${name}: dataMessage`);
         switch (dataMessage.EventType) {
             case 'Create_Order': {
-                let order = await ordersRepo.findOne({ OrderId: dataMessage.OrderId });
+                let order = await ordersRepository.findOne({ OrderId: dataMessage.OrderId });
                 if (!order) {
                     let order = Order.Create({ OrderId: dataMessage.OrderId });
                     logger.debug(JSON.stringify(dataMessage))
 
-                    await ordersRepo.save(order)
+                    await ordersRepository.save(order)
                     DomainEvents.dispatchEventsForAggregate(order.id);
                     logger.debug(JSON.stringify(order));
                     subscriber.ack(message);
@@ -36,10 +36,10 @@ const makeHandler = (subscriber: any, name: string) => async (message: any) => {
             }
                 break;
             case 'Order_Payment_Completed': {
-                let order = await ordersRepo.findOne({ OrderId: dataMessage.OrderId });
+                let order = await ordersRepository.findOne({ OrderId: dataMessage.OrderId });
                 if (order) {
                     order.complete();
-                    await ordersRepo.save(order)
+                    await ordersRepository.save(order)
                     DomainEvents.dispatchEventsForAggregate(order.id);
                     logger.debug(JSON.stringify(order));
                     subscriber.ack(message);
@@ -50,10 +50,10 @@ const makeHandler = (subscriber: any, name: string) => async (message: any) => {
             }
                 break;
             case 'Order_Payment_Cancelled': {
-                let order = await ordersRepo.findOne({ OrderId: dataMessage.OrderId });
+                let order = await ordersRepository.findOne({ OrderId: dataMessage.OrderId });
                 if (order) {
                     order.cancelled(dataMessage.Reason);
-                    await ordersRepo.save(order)
+                    await ordersRepository.save(order)
                     DomainEvents.dispatchEventsForAggregate(order.id);
                     logger.debug(JSON.stringify(order));
                     subscriber.ack(message);

@@ -1,6 +1,7 @@
 import axios, { AxiosRequestConfig } from 'axios';
 import { logger } from './logger';
-const { BANK_API } = require('../constants')
+
+const { BANK_API } = require('../constants');
 
 const create = async (UserId: string, StartingBalance?: number) => {
     var data = JSON.stringify({
@@ -54,16 +55,15 @@ const transfer = async (GameId: string, UserId: string, Amount: number) => {
         data: JSON.stringify(data),
     };
 
-    const response = await axios.post(config.url, config.data, config).catch(({ response }) => {
-        logger.error(`transfer ${JSON.stringify(response.data)}`);
-        logger.error(`transfer ${response.status}`);
-        logger.error(`transfer ${JSON.stringify(response.headers)}`);
-
-        throw new Error(`ERROR create ${JSON.stringify(response.data)}`);
+    return axios.post(config.url, config.data, config).then((response) => {
+        let result = response?.data;
+        return { status: 'success', data: result };
+    }).catch(({ response }) => {
+        logger.error(`create ${JSON.stringify(response.data)}`);
+        logger.error(`create ${response.status}`);
+        logger.error(`create ${JSON.stringify(response.headers)}`);
     });
 
-    let result = response?.data;
-    logger.debug(`********** end transfer ${JSON.stringify(result)}`);
 };
 
 const getaccount = async (UserId: string) => {
@@ -90,4 +90,4 @@ const getaccount = async (UserId: string) => {
         });
 };
 
-export { create, transfer,getaccount };
+export { create, transfer, getaccount };

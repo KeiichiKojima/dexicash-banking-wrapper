@@ -54,7 +54,7 @@ export class Redemption extends AggregateRoot<IDexiCash_Redemption> {
     }
 
     public static Create(props: IDexiCash_Redemption, id?: UniqueEntityID): Redemption {
-        props.Status = Redemption_Status.Created
+        props.Status = props.Status ||  Redemption_Status.Created
         const redemption = new Redemption({
             ...props,
         }, id);

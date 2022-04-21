@@ -53,7 +53,7 @@ export class Order extends AggregateRoot<IDexiCash_Order> {
     }
 
     public static Create(props: IDexiCash_Order, id?: UniqueEntityID): Order {
-        props.Status = Order_Status.Created
+        props.Status = props.Status ||  Order_Status.Created
         const order = new Order({
             ...props,
         }, id);

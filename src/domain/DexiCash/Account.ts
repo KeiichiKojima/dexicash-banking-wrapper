@@ -53,7 +53,7 @@ export class Account extends AggregateRoot<IDexiCash_Account> {
     }
 
     public static Create(props: IDexiCash_Account, id?: UniqueEntityID): Account {
-        props.Status = Account_Status.Created
+        props.Status = props.Status || Account_Status.Created
         const account = new Account({
             ...props,
         }, id);
