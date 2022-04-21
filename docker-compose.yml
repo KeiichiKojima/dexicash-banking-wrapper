@@ -9,36 +9,37 @@ services:
     networks:
       - dexi-gateway
     restart: unless-stopped
-  gateway:
-    image: "487111956536.dkr.ecr.us-east-1.amazonaws.com/dexi/gateway:latest"
+  mongodb:
+    image: mongo:latest
+    restart: unless-stopped
+    env_file: ./.env
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=$MONGODB_USER
+      - MONGO_INITDB_ROOT_PASSWORD=$MONGODB_PASSWORD
     ports:
-      - '8080:8080'
-    depends_on:
-      - rabbitmq
-    links:
-      - "rabbitmq:dexi-rabbitmq"
+      - $MONGODB_LOCAL_PORT:$MONGODB_DOCKER_PORT
+    volumes:
+      - mongodb_data:/data/db
     networks:
       - dexi-gateway
-    restart: unless-stopped
   saga:
     image: "487111956536.dkr.ecr.us-east-1.amazonaws.com/dexi/saga_manager:latest"
+    ports:
+      - '8080:8080'
+    environment:
+      - DB_HOST=mongodb
+      - DB_USER=$MONGODB_USER
+      - DB_PASSWORD=$MONGODB_PASSWORD
+      - DB_NAME=$MONGODB_DATABASE
+      - DB_PORT=$MONGODB_DOCKER_PORT
     depends_on:
+      - mongodb
       - rabbitmq
     links:
       - "rabbitmq:dexi-rabbitmq"
     networks:
       - dexi-gateway
     restart: unless-stopped
-  mongodb_container:
-    image: mongo:latest
-    environment:
-      MONGO_INITDB_DATABASE: wrapperDB
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: password
-    ports:
-      - 27017:27017
-    volumes:
-      - mongodb_data_container:/data/db
 networks:
   dexi-gateway:
     driver:
@@ -46,4 +47,4 @@ networks:
     attachable:
       true
 volumes:
-  mongodb_data_container:
+  mongodb_data:
