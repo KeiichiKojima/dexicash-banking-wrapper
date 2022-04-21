@@ -19,4 +19,4 @@ COPY . .
 RUN npm run build
 
 EXPOSE 8080
-CMD [ "node", "dists/listeners.js" ]
+CMD [ "node", "dist/listeners.js" ]

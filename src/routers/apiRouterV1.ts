@@ -1,4 +1,4 @@
-import { rabbitChannel } from 'connectRabbit';
+import { rabbitChannel } from '../connectRabbit';
 import { Router } from 'express';
 
 const apiRouterV1 = Router();

@@ -9,20 +9,25 @@ services:
     networks:
       - dexi-gateway
     restart: unless-stopped
-  gateway:
-    image: "487111956536.dkr.ecr.us-east-1.amazonaws.com/dexi/gateway:latest"
+  mongodb:
+    image: mongo:latest
+    restart: unless-stopped
     ports:
-      - '8080:8080'
-    depends_on:
-      - rabbitmq
-    links:
-      - "rabbitmq:dexi-rabbitmq"
+      - $MONGODB_LOCAL_PORT:$MONGODB_DOCKER_PORT
+    volumes:
+      - mongodb_data:/data/db
     networks:
       - dexi-gateway
-    restart: unless-stopped
   saga:
     image: "487111956536.dkr.ecr.us-east-1.amazonaws.com/dexi/saga_manager:latest"
+    ports:
+      - '8080:8080'
+    environment:
+      - DB_HOST=mongodb
+      - DB_NAME=$MONGODB_DATABASE
+      - DB_PORT=$MONGODB_DOCKER_PORT
     depends_on:
+      - mongodb
       - rabbitmq
     links:
       - "rabbitmq:dexi-rabbitmq"
@@ -35,3 +40,5 @@ networks:
       overlay
     attachable:
       true
+volumes:
+  mongodb_data:
