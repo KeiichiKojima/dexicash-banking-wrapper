@@ -1,12 +1,8 @@
 import { BaseRepository } from './BaseRepository';
 import { Account, IDexiCash_Account } from '../domain/DexiCash/Account';
 import { IReadObject } from './interfaces/IRead';
-import AccountModel from '../database/models/account.model';
 
-export class AccountRepository extends BaseRepository<IDexiCash_Account, Account> implements IReadObject<Account> {
-    constructor() {
-        super(AccountModel);
-    }
+export class AccountRepository extends BaseRepository<IDexiCash_Account, Account> implements IReadObject<IDexiCash_Account, Account> {
 
     async findOne(filter: Partial<IDexiCash_Account>): Promise<Account | null> {
         const findOneRes = await this._findOne(filter);

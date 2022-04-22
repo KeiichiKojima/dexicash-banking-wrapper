@@ -1,20 +1,15 @@
 import { BaseRepository } from './BaseRepository';
 import { Reward, IDexiCash_Reward } from '../domain/DexiCash/Reward';
 import { IReadObject } from './interfaces/IRead';
-import RewardModel from '../database/models/reward.model';
 
-export class RewardRepository extends BaseRepository<IDexiCash_Reward, Reward> implements IReadObject<Reward> {
-    constructor() {
-        super(RewardModel);
-    }
-
+export class RewardRepository extends BaseRepository<IDexiCash_Reward, Reward> implements IReadObject<IDexiCash_Reward, Reward> {
     async findOne(filter: Partial<IDexiCash_Reward>): Promise<Reward | null> {
         const findOneRes = await this._findOne(filter);
 
         if (!findOneRes) {
             return null;
         }
-        
+
         return Reward.Create(findOneRes.props, findOneRes.id);
     }
 

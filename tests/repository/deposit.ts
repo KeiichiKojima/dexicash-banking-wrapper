@@ -3,9 +3,11 @@ import { Deposit, Deposit_Status } from '../../src/domain/DexiCash/Deposit';
 import { expect } from 'chai';
 import "dotenv/config";
 import DepositModel from '../../src/database/models/deposit.model';
+import { DBContext } from '../../src/repositories/DBContext';
+import { InMemoryContext } from '../../src/repositories/InMemoryContext';
 
 describe('Deposit Repo tests', () => {
-    const depositRepo = new DepositRepository();
+    const depositRepo = new DepositRepository(new InMemoryContext());
 
     const deposit1 = Deposit.Create({ OrderId: "1", StatusReason: "no reason" });
     const deposit2 = Deposit.Create({ OrderId: "2", StatusReason: "no reasons" });

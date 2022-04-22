@@ -3,12 +3,14 @@ import { Account, Account_Status } from '../../src/domain/DexiCash/Account';
 import { expect } from 'chai';
 import "dotenv/config";
 import AccountModel from '../../src/database/models/account.model';
+import { DBContext } from '../../src/repositories/DBContext';
+import { InMemoryContext } from '../../src/repositories/InMemoryContext';
 
 describe('Account Repo tests', () => {
-    const accountRepo = new AccountRepository();
+    const accountRepo = new AccountRepository(new InMemoryContext());
 
     const account1 = Account.Create({ UserId: "1" });
-    const account2 = Account.Create({ UserId: "2" });``
+    const account2 = Account.Create({ UserId: "2" });
 
     it('create', async () => {
         expect(await accountRepo.create(account1), "Create account 1").to.be.true;

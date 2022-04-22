@@ -1,13 +1,8 @@
 import { BaseRepository } from './BaseRepository';
 import { Order, IDexiCash_Order } from '../domain/DexiCash/Order';
 import { IReadObject } from './interfaces/IRead';
-import OrderModel from '../database/models/order.model';
 
-export class OrderRepository extends BaseRepository<IDexiCash_Order, Order> implements IReadObject<Order> {
-    constructor() {
-        super(OrderModel);
-    }
-
+export class OrderRepository extends BaseRepository<IDexiCash_Order, Order> implements IReadObject<IDexiCash_Order, Order> {
     async findOne(filter: Partial<Order>): Promise<Order | null> {
         const findOneRes = await this._findOne(filter);
 
