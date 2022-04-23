@@ -1,12 +1,25 @@
 import { OrderRepository } from '../../src/repositories/OrderRepository';
 import { Order, Order_Status } from '../../src/domain/DexiCash/Order';
 import { expect } from 'chai';
+import "dotenv/config";
+import OrderModel from '../../src/database/models/order.model';
+import { DBContext } from '../../src/repositories/DBContext';
+import { InMemoryContext } from '../../src/repositories/InMemoryContext';
+import { OrderDBContext } from '../../src/repositories/DomainDBContexts/index';
 
 describe('Order Repo tests', () => {
-    const orderRepo = new OrderRepository();
+    const orderRepo = new OrderRepository(new DBContext(OrderModel));
+    // or const orderRepo = new OrderRepository(new OrderDBContext());
 
     const order1 = Order.Create({ OrderId: "1", StatusReason: "no reason"});
     const order2 = Order.Create({ OrderId: "2", StatusReason: "no reasons"});
+
+    before(async () => {
+        const connectMongo = require('../../src/connectMongo').default;
+        await connectMongo();
+
+        await OrderModel.remove({});
+    });
     
     it('create', async () => {
         expect(await orderRepo.create(order1), "Create order 1").to.be.true;

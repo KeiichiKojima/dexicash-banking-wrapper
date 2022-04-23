@@ -2,9 +2,9 @@ import mongoose from 'mongoose';
 import { IDomainModel } from '../../domain/interfaces/IDomainModel';
 import domainSchema from '../../database/domainSchema';
 
-const OrderModel = mongoose.model<IDomainModel>(
-    'order',
+const DepositModel = mongoose.model<IDomainModel>(
+    'deposit',
     domainSchema,
 );
 
-export default OrderModel;
+export default DepositModel;

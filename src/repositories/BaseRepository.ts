@@ -1,59 +1,28 @@
 import { IRepository } from './interfaces/IRepository';
-import { isMatch } from 'lodash';
 import { AggregateRoot } from '../core/domain/AggregateRoot';
 import { UniqueEntityID } from '../core/domain/UniqueEntityID';
 
-export abstract class BaseRepository<Q extends Object, T extends AggregateRoot<Q>> implements IRepository<T> {
-    private documents: Record<string, string>;
+export class BaseRepository<Q extends Object, T extends AggregateRoot<Q>> implements IRepository<Q, T> {
+    protected context: IRepository<Q, T>;
 
-    constructor() {
-        this.documents = {};
+    constructor(context: IRepository<Q, T>) {
+        this.context = context;
     }
 
     async create(item: T): Promise<boolean> {
-        if (!this.documents[item.id.toString()]) {
-            this.documents[item.id.toString()] = JSON.stringify(item);
-
-            return true;
-        }
-
-        return false;
+        return this.context.create(item);
     }
 
-    async _findOne(filter: Partial<T>): Promise<T | null> {
-        for (let id in this.documents) {
-            const obj = JSON.parse(this.documents[id]) as T;
-
-            if (isMatch(obj.props, filter)) {
-                return obj;
-            }
-        }
-
-        return null;
+    async _findOne(filter: Partial<Q>): Promise<T | null> {
+        return this.context._findOne(filter);
     }
 
-    async _find(filter: Partial<T>): Promise<T[]> {
-        const docs: T[] = [];
-
-        for (let id in this.documents) {
-            const obj = JSON.parse(this.documents[id]);
-
-            if (isMatch(obj.props, filter)) {
-                docs.push(obj);
-            }
-        }
-
-        return docs;
+    async _find(filter: Partial<Q>): Promise<T[]> {
+        return this.context._find(filter);
     }
 
     async update(id: UniqueEntityID, item: T): Promise<boolean> {
-        try {
-            this.documents[id.toString()] = JSON.stringify(item);
-
-            return true;
-        } catch {
-            return false;
-        }
+        return this.context.update(id, item);
     }
 
     async save(item: T): Promise<boolean> {
@@ -61,12 +30,6 @@ export abstract class BaseRepository<Q extends Object, T extends AggregateRoot<Q
     }
 
     async delete(id: UniqueEntityID): Promise<boolean> {
-        try {
-            delete this.documents[id.toString()];
-
-            return true;
-        } catch {
-            return false;
-        }
+        return this.context.delete(id);
     }
 }
