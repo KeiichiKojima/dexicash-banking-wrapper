@@ -13,9 +13,9 @@ describe('Account Repo tests', () => {
     const account2 = Account.Create({ UserId: "2" });
 
     it('create', async () => {
-        expect(await accountRepo.create(account1), "Create account 1").to.be.true;
+        expect(await accountRepo.save(account1), "Create account 1").to.be.true;
 
-        expect(await accountRepo.create(account2), "Create account 2").to.be.true;
+        expect(await accountRepo.save(account2), "Create account 2").to.be.true;
     });
 
     before(async () => {

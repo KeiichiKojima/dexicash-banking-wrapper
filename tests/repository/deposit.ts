@@ -20,9 +20,9 @@ describe('Deposit Repo tests', () => {
     });
 
     it('create', async () => {
-        expect(await depositRepo.create(deposit1), "Create deposit 1").to.be.true;
+        expect(await depositRepo.save(deposit1), "Create deposit 1").to.be.true;
 
-        expect(await depositRepo.create(deposit2), "Create deposit 2").to.be.true;
+        expect(await depositRepo.save(deposit2), "Create deposit 2").to.be.true;
     });
 
     it('update', async () => {

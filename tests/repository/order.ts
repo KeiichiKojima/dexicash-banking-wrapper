@@ -22,9 +22,9 @@ describe('Order Repo tests', () => {
     });
     
     it('create', async () => {
-        expect(await orderRepo.create(order1), "Create order 1").to.be.true;
+        expect(await orderRepo.save(order1), "Create order 1").to.be.true;
 
-        expect(await orderRepo.create(order2), "Create order 2").to.be.true;
+        expect(await orderRepo.save(order2), "Create order 2").to.be.true;
     });
 
     it('update', async () => {

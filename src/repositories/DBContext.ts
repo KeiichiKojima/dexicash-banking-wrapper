@@ -65,7 +65,12 @@ export class DBContext<Q extends Object, T extends AggregateRoot<Q>> implements 
             await this.model.findOneAndUpdate({
                 entityId
             }, {
+                entityId,
                 objectJson: item
+            }, {
+                upsert: true,
+                new: true,
+                setDefaultsOnInsert: true,
             })
 
             return true;
