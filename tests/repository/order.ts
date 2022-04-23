@@ -23,8 +23,14 @@ describe('Order Repo tests', () => {
     
     it('create', async () => {
         expect(await orderRepo.save(order1), "Create order 1").to.be.true;
+        order1.complete();
+        expect(await orderRepo.save(order1), "Create order 1").to.be.true;
 
         expect(await orderRepo.save(order2), "Create order 2").to.be.true;
+
+        const findAllRes = await orderRepo.find({});
+
+        expect(findAllRes.length).equal(2);
     });
 
     it('update', async () => {
