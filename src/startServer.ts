@@ -1,10 +1,10 @@
 import express from 'express';
-import routers from 'routers';
+import routers from './routers';
 
 const startServer = () => {
     console.log('starting server...');
 
-    const port = process.env.PORT || 5000;
+    const port = process.env.SERVER_PORT || 8080;
 
     const app = express();
 

@@ -1,0 +1,44 @@
+version: "3.9"
+
+services:
+  rabbitmq:
+    image: "rabbitmq:3-management"
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - dexi-gateway
+    restart: unless-stopped
+  mongodb:
+    image: mongo:latest
+    restart: unless-stopped
+    ports:
+      - $MONGODB_LOCAL_PORT:$MONGODB_DOCKER_PORT
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - dexi-gateway
+  saga:
+    image: "487111956536.dkr.ecr.us-east-1.amazonaws.com/dexi/saga_manager:latest"
+    ports:
+      - '8080:8080'
+    environment:
+      - DB_HOST=mongodb
+      - DB_NAME=$MONGODB_DATABASE
+      - DB_PORT=$MONGODB_DOCKER_PORT
+    depends_on:
+      - mongodb
+      - rabbitmq
+    links:
+      - "rabbitmq:dexi-rabbitmq"
+    networks:
+      - dexi-gateway
+    restart: unless-stopped
+networks:
+  dexi-gateway:
+    driver:
+      overlay
+    attachable:
+      true
+volumes:
+  mongodb_data:

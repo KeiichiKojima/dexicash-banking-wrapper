@@ -1,9 +1,10 @@
+import dbConfig from './database/config';
 import mongoose from 'mongoose';
 
 const connectMongo = () => {
     console.log('connecting to mongodb...');
 
-    const connect = mongoose.connect(process.env.MONGODB_URI);
+    const connect = mongoose.connect(dbConfig.url);
 
     const env = process.env.NODE_ENV || 'development';
     const debug = env === 'development';

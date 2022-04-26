@@ -1,18 +1,21 @@
 {
   "compilerOptions": {
+    "moduleResolution": "node",
     "module": "commonjs",
     "esModuleInterop": true,
     "target": "es6",
     "noImplicitAny": true,
-    "moduleResolution": "node",
     "sourceMap": true,
-    "outDir": "dists",
+    "outDir": "dist",
     "baseUrl": "src",
     "paths": {
+      "@services/*": ["services/*"],
       "@database/*": ["database/*"],
       "@routers/*": ["routers/*"],
-      "@rabbit/*": ["rabbit/*"]
+      "@rabbit/*": ["rabbit/*"],
+      "@domain/*": ["domain/*"]
     }
   },
-  "include": ["src/**/*"]
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modues"]
 }
